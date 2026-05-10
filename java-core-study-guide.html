@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Core — Panel Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f14;
+    --surface: #161820;
+    --border: #252730;
+    --border-bright: #353848;
+    --text: #e8e9f0;
+    --muted: #7a7d8f;
+    --accent: #E8B84B;
+    --accent-dim: rgba(232,184,75,0.12);
+    --accent-border: rgba(232,184,75,0.3);
+    --green: #39FF14;
+    --green-dim: rgba(57,255,20,0.1);
+    --blue: #00D9FF;
+    --blue-dim: rgba(0,217,255,0.1);
+    --red: #ff5c5c;
+    --red-dim: rgba(255,92,92,0.1);
+    --radius: 6px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; min-height: 100vh; padding-top: 56px; overflow-x: hidden; }
+  
+  .page-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    font-family: var(--sans);
+    font-size: 13px;
+    z-index: 1000;
+  }
+  .page-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    font-family: var(--mono);
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .page-nav a:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .page-nav a.home { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+  .page-nav a.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+  .page-nav .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 2rem 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { padding: 0 1.25rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .sidebar-logo .logo-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+  .sidebar-logo h1 { font-size: 17px; font-weight: 600; color: var(--text); margin-top: 3px; }
+  .sidebar-logo p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .nav-section { padding: 0 0.75rem; margin-bottom: 0.5rem; }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0 0.5rem; margin-bottom: 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--muted); transition: all 0.15s; border: 1px solid transparent; }
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); font-weight: 500; }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  .content { padding: 2.5rem 3rem; max-width: 860px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .section-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 6px; }
+  .section-title { font-size: 24px; font-weight: 600; color: var(--text); }
+  .section-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card:hover { border-color: var(--border-bright); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .badge { font-family: var(--mono); font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 3px; letter-spacing: 0.04em; }
+  .badge-gold { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(0,217,255,0.3); }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(57,255,20,0.3); }
+
+  .body-text { color: #b0b3c4; font-size: 14px; line-height: 1.7; }
+  .body-text code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); background: var(--accent-dim); padding: 1px 5px; border-radius: 3px; }
+  .body-text strong { color: var(--text); font-weight: 600; }
+
+  .code-block { background: #0a0b0f; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 1rem 1.25rem; font-family: var(--mono); font-size: 12.5px; color: #c9cde0; margin: 0.75rem 0; white-space: pre; overflow-x: auto; line-height: 1.65; }
+  .code-block .comment { color: #4a4e5e; }
+  .code-block .kw { color: var(--blue); }
+  .code-block .str { color: var(--green); }
+  .code-block .type { color: #c792ea; }
+  .code-block .num { color: var(--accent); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+  .sub-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 0.75rem 0 0.35rem; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0.75rem 0; }
+  .split-card { border-radius: var(--radius); padding: 0.85rem 1rem; font-size: 13px; line-height: 1.6; color: #b0b3c4; }
+  .split-card strong { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; font-family: var(--mono); }
+  .split-green { background: var(--green-dim); border: 1px solid rgba(57,255,20,0.2); }
+  .split-green strong { color: var(--green); }
+  .split-red { background: var(--red-dim); border: 1px solid rgba(255,92,92,0.2); }
+  .split-red strong { color: var(--red); }
+  .split-blue { background: var(--blue-dim); border: 1px solid rgba(0,217,255,0.2); }
+  .split-blue strong { color: var(--blue); }
+  .split-gold { background: var(--accent-dim); border: 1px solid var(--accent-border); }
+  .split-gold strong { color: var(--accent); }
+
+  .tip-box { background: rgba(232,184,75,0.06); border: 1px solid var(--accent-border); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 0.75rem 0; }
+  .tip-label { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.07em; margin-bottom: 3px; }
+  .tip-text { font-size: 13px; color: #b0b3c4; line-height: 1.6; }
+  .tip-text code { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+  img, iframe { max-width: 100%; height: auto; }
+  pre, .code-block { overflow-x: auto; white-space: pre; max-width: 100%; word-break: normal; }
+
+  .table-wrap { margin: 0.75rem 0; overflow-x: auto; }
+  table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 7px 10px; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--border); letter-spacing: 0.05em; text-transform: uppercase; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: #b0b3c4; }
+  td:first-child { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+  tr:last-child td { border-bottom: none; }
+
+  .quiz-strip { display: flex; align-items: center; gap: 10px; margin-top: 1.5rem; padding: 0.85rem 1rem; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: var(--radius); }
+  .quiz-strip-text { font-size: 13px; color: var(--muted); flex: 1; }
+  .quiz-strip-text strong { color: var(--text); }
+
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { padding: 1.5rem; }
+    .split { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body style="padding-top:56px">
+<nav class="page-nav"><a class="home" href="index.html">&larr; Home</a><div class="nav-links"><a href="ai-learning-hub.html">AI Learning Hub</a><a href="cisco-interview-prep.html">Cisco Interview Prep</a><a href="embedding-space-intuition.html">Embedding Space Intuition</a><a class="active" href="java-core-study-guide.html">Java Core Study Guide</a><a href="prompt-engineering-builder.html">Prompt Engineering Builder</a></div></nav>
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-tag">Panel Prep</div>
+    <h1>Java Core</h1>
+    <p>SWE 2 · Cisco Interview</p>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Modules</div>
+    <div class="nav-item active" onclick="show('oop', this)"><span class="nav-dot"></span>OOP Fundamentals</div>
+    <div class="nav-item" onclick="show('collections', this)"><span class="nav-dot"></span>Collections</div>
+    <div class="nav-item" onclick="show('streams', this)"><span class="nav-dot"></span>Streams & Lambdas</div>
+    <div class="nav-item" onclick="show('concurrency', this)"><span class="nav-dot"></span>Concurrency</div>
+  </div>
+</nav>
+
+<main class="content">
+
+<!-- OOP -->
+<div id="sec-oop" class="section active">
+  <div class="section-header">
+    <div class="section-tag">Module 01</div>
+    <div class="section-title">OOP Fundamentals</div>
+    <div class="section-sub">Polymorphism · Encapsulation · Inheritance · Interfaces vs Abstract Classes</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Polymorphism</div>
+      <span class="badge badge-gold">watch for: compile-time vs runtime</span>
+    </div>
+    <p class="body-text">The same method call behaves differently depending on the <em>runtime type</em> of the object. Enables writing generic code against abstractions rather than concrete types.</p>
+    <div class="code-block"><span class="kw">abstract class</span> <span class="type">Animal</span> {
+    <span class="kw">abstract</span> <span class="type">String</span> speak();
+}
+<span class="kw">class</span> <span class="type">Dog</span> extends <span class="type">Animal</span> {
+    <span class="type">String</span> speak() { <span class="kw">return</span> <span class="str">"Woof"</span>; }
+}
+<span class="kw">class</span> <span class="type">Cat</span> extends <span class="type">Animal</span> {
+    <span class="type">String</span> speak() { <span class="kw">return</span> <span class="str">"Meow"</span>; }
+}
+
+<span class="type">Animal</span> a = <span class="kw">new</span> <span class="type">Dog</span>();
+System.out.println(a.speak()); <span class="comment">// "Woof" — resolved at runtime</span></div>
+    <div class="tip-box">
+      <div class="tip-label">Panel angle</div>
+      <div class="tip-text"><strong>Compile-time</strong> (static) polymorphism = method overloading — same name, different parameter types, resolved at compile time. <strong>Runtime</strong> (dynamic) polymorphism = method overriding via inheritance — resolved by JVM dispatch table at runtime. Interviewers love this distinction.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Encapsulation</div></div>
+    <p class="body-text">Bundle data and behavior together, and restrict direct access to internal state via access modifiers: <code>private</code>, <code>protected</code>, <code>public</code>.</p>
+    <div class="code-block"><span class="kw">public class</span> <span class="type">BankAccount</span> {
+    <span class="kw">private double</span> balance; <span class="comment">// hidden from outside</span>
+
+    <span class="kw">public void</span> deposit(<span class="kw">double</span> amount) {
+        <span class="kw">if</span> (amount > <span class="num">0</span>) balance += amount; <span class="comment">// guarded write</span>
+    }
+    <span class="kw">public double</span> getBalance() { <span class="kw">return</span> balance; }
+}</div>
+    <p class="body-text">The benefit is invariant protection — callers can't set balance to a negative number directly. All mutation paths go through your logic.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Inheritance</div></div>
+    <p class="body-text">A subclass extends a superclass, inheriting fields and methods. Use when a clear "is-a" relationship exists. Java supports single-inheritance for classes only.</p>
+    <div class="code-block"><span class="kw">class</span> <span class="type">Vehicle</span> {
+    <span class="kw">int</span> speed;
+    <span class="kw">void</span> accelerate() { speed += <span class="num">10</span>; }
+}
+<span class="kw">class</span> <span class="type">Car</span> extends <span class="type">Vehicle</span> {
+    <span class="kw">int</span> doors;
+    <span class="comment">// inherits speed + accelerate()</span>
+}</div>
+    <div class="tip-box">
+      <div class="tip-label">Watch out</div>
+      <div class="tip-text">Deep inheritance chains become rigid and hard to refactor. Favor <strong>composition over inheritance</strong> when the relationship is "has-a" rather than "is-a". E.g. a <code>Car</code> has an <code>Engine</code> — don't extend Engine.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Interface vs Abstract Class</div>
+      <span class="badge badge-gold">most common OOP interview question</span>
+    </div>
+    <div class="split">
+      <div>
+        <div class="sub-label">Interface</div>
+        <p class="body-text">Pure contract. Since Java 8 can have <code>default</code> and <code>static</code> methods. No instance state. A class can implement <em>many</em> interfaces.</p>
+        <div class="code-block"><span class="kw">interface</span> <span class="type">Flyable</span> {
+    <span class="kw">void</span> fly();
+    <span class="kw">default</span> <span class="type">String</span> mode() {
+        <span class="kw">return</span> <span class="str">"air"</span>;
+    }
+}</div>
+      </div>
+      <div>
+        <div class="sub-label">Abstract Class</div>
+        <p class="body-text">Can have instance fields, constructors, and concrete methods. Single inheritance only. Use when subclasses share common state or base logic.</p>
+        <div class="code-block"><span class="kw">abstract class</span> <span class="type">Shape</span> {
+    <span class="type">String</span> color; <span class="comment">// shared state</span>
+    <span class="kw">abstract double</span> area();
+    <span class="kw">void</span> describe() {
+        System.out.println(color);
+    }
+}</div>
+      </div>
+    </div>
+    <div class="split">
+      <div class="split-card split-green"><strong>Use Interface when</strong>Multiple unrelated classes share a capability (Serializable, Comparable, Runnable). Prefer for API design. Supports multiple inheritance of type.</div>
+      <div class="split-card split-red"><strong>Use Abstract Class when</strong>Subclasses share state or partial implementation. You need a constructor, initializer logic, or non-public members.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Collections -->
+<div id="sec-collections" class="section">
+  <div class="section-header">
+    <div class="section-tag">Module 02</div>
+    <div class="section-title">Collections</div>
+    <div class="section-sub">HashMap internals · ArrayList vs LinkedList · When to use each</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">HashMap internals</div>
+      <span class="badge badge-gold">frequently asked</span>
+    </div>
+    <p class="body-text">HashMap stores entries in an array of <strong>buckets</strong>. Each key is hashed via <code>hashCode()</code>, the hash determines the bucket index. Collisions within a bucket are stored as a linked list — and since Java 8, that list converts to a <strong>red-black tree</strong> when a bucket hits 8 entries.</p>
+    <div class="code-block"><span class="comment">// What happens under the hood for map.put("hello", 42):</span>
+<span class="comment">// 1. hash  = "hello".hashCode()      → e.g. 99162322</span>
+<span class="comment">// 2. index = hash & (capacity - 1)   → e.g. bucket 2 (capacity 16)</span>
+<span class="comment">// 3. Store Entry{key="hello", value=42} at buckets[2]</span>
+<span class="comment">// 4. Collision → chain as linked list → tree at bucket size 8</span></div>
+    <div class="split">
+      <div class="split-card split-blue"><strong>Key numbers</strong>Default capacity: 16<br>Load factor: 0.75<br>Rehash when: size > capacity × 0.75<br>Rehash cost: O(n) — doubles capacity</div>
+      <div class="split-card split-gold"><strong>hashCode contract</strong>If a.equals(b) then a.hashCode() == b.hashCode() must hold. Violate this and HashMap lookups silently break — you store a value but can never retrieve it.</div>
+    </div>
+    <div class="tip-box">
+      <div class="tip-label">Panel angle</div>
+      <div class="tip-text">If asked about worst-case HashMap performance: without the Java 8 tree optimization it was O(n) per get due to long collision chains. With treeification it degrades to O(log n) in the worst case — but average is O(1).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">ArrayList vs LinkedList</div></div>
+    <div class="split">
+      <div class="split-card split-green"><strong>ArrayList</strong>Backed by a dynamic array. O(1) random access by index. O(n) insert/delete in middle (shifts elements). Low memory overhead. CPU cache-friendly. Default choice for most lists.</div>
+      <div class="split-card split-red"><strong>LinkedList</strong>Doubly-linked nodes. O(1) insert/delete at head or tail. O(n) random access. High memory overhead (two pointers per node). Implements Deque — useful as a queue.</div>
+    </div>
+    <div class="code-block"><span class="comment">// Use ArrayList for almost everything</span>
+<span class="type">List</span>&lt;<span class="type">String</span>&gt; list = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+
+<span class="comment">// Use LinkedList only as a queue/deque</span>
+<span class="type">Deque</span>&lt;<span class="type">String</span>&gt; queue = <span class="kw">new</span> <span class="type">LinkedList</span>&lt;&gt;();
+queue.offer(<span class="str">"first"</span>);
+queue.poll(); <span class="comment">// removes and returns "first"</span>
+
+<span class="comment">// Actually: ArrayDeque is faster than LinkedList as a deque</span>
+<span class="type">Deque</span>&lt;<span class="type">String</span>&gt; better = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();</div>
+    <div class="tip-box">
+      <div class="tip-label">Panel tip</div>
+      <div class="tip-text">If asked "when would you use LinkedList?" — answer: as a queue or deque implementation, not as a general-purpose list. ArrayList wins in almost every benchmark due to memory locality. And for a deque, <code>ArrayDeque</code> is faster than LinkedList anyway.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Which Collection for which job</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>When to use</th><th>Complexity</th></tr></thead>
+        <tbody>
+          <tr><td>HashMap</td><td>Fast key-value lookup, no order required</td><td>O(1) avg get/put</td></tr>
+          <tr><td>LinkedHashMap</td><td>Insertion-order preserved — good for LRU cache</td><td>O(1) avg</td></tr>
+          <tr><td>TreeMap</td><td>Keys sorted, range queries needed</td><td>O(log n)</td></tr>
+          <tr><td>HashSet</td><td>Unique elements, fast contains()</td><td>O(1) avg</td></tr>
+          <tr><td>ArrayDeque</td><td>Stack or queue — fastest option</td><td>O(1) head/tail</td></tr>
+          <tr><td>PriorityQueue</td><td>Min/max heap — Dijkstra, task scheduling</td><td>O(log n) poll</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Streams -->
+<div id="sec-streams" class="section">
+  <div class="section-header">
+    <div class="section-tag">Module 03</div>
+    <div class="section-title">Streams & Lambdas</div>
+    <div class="section-sub">filter · map · collect · Optional · Lambda syntax</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Streams overview</div>
+      <span class="badge badge-blue">Java 8+</span>
+    </div>
+    <p class="body-text">Streams let you process sequences of elements in a declarative pipeline. They are <strong>lazy</strong> — intermediate operations don't execute until a terminal operation is called. Streams are not data structures; they don't store data.</p>
+    <div class="code-block"><span class="type">List</span>&lt;<span class="type">String</span>&gt; names = <span class="type">List</span>.of(<span class="str">"Alice"</span>, <span class="str">"Bob"</span>, <span class="str">"Anna"</span>, <span class="str">"Charlie"</span>);
+
+<span class="type">List</span>&lt;<span class="type">String</span>&gt; result = names.stream()
+    .filter(n -> n.startsWith(<span class="str">"A"</span>))    <span class="comment">// intermediate, lazy</span>
+    .map(<span class="type">String</span>::toUpperCase)             <span class="comment">// intermediate, lazy</span>
+    .collect(Collectors.toList());        <span class="comment">// terminal — triggers pipeline</span>
+
+<span class="comment">// result: ["ALICE", "ANNA"]</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">filter, map, collect</div></div>
+    <div class="sub-label">filter — Predicate&lt;T&gt; → keeps elements where predicate is true</div>
+    <div class="code-block">stream.filter(x -> x > <span class="num">0</span>)            <span class="comment">// keep positives</span>
+stream.filter(s -> s.length() > <span class="num">3</span>)   <span class="comment">// keep long strings</span></div>
+    <div class="sub-label">map — Function&lt;T,R&gt; → transforms each element</div>
+    <div class="code-block">stream.map(<span class="type">String</span>::length)            <span class="comment">// Stream&lt;String&gt; → Stream&lt;Integer&gt;</span>
+stream.mapToInt(<span class="type">String</span>::length).sum() <span class="comment">// primitive stream, avoids boxing</span></div>
+    <div class="sub-label">collect — terminal, accumulates results</div>
+    <div class="code-block">stream.collect(Collectors.toList())
+stream.collect(Collectors.toSet())
+stream.collect(Collectors.joining(<span class="str">", "</span>))
+
+<span class="comment">// groupingBy — produces Map&lt;K, List&lt;V&gt;&gt;</span>
+stream.collect(Collectors.groupingBy(<span class="type">String</span>::length))
+<span class="comment">// {3: ["Bob"], 5: ["Alice", "Anna"], 7: ["Charlie"]}</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Optional</div>
+      <span class="badge badge-gold">null safety</span>
+    </div>
+    <p class="body-text">A container that may or may not hold a value. Forces the caller to handle the "empty" case rather than risking a NullPointerException silently.</p>
+    <div class="code-block"><span class="type">Optional</span>&lt;<span class="type">String</span>&gt; opt = <span class="type">Optional</span>.of(<span class="str">"hello"</span>);
+
+opt.isPresent()                          <span class="comment">// check before get</span>
+opt.get()                                <span class="comment">// throws NoSuchElementException if empty</span>
+opt.orElse(<span class="str">"default"</span>)                   <span class="comment">// fallback value</span>
+opt.orElseGet(() -> computeFallback())   <span class="comment">// lazy fallback</span>
+opt.orElseThrow(RuntimeException::<span class="kw">new</span>)
+opt.map(<span class="type">String</span>::toUpperCase)            <span class="comment">// transform if present</span>
+opt.ifPresent(System.out::println)       <span class="comment">// side effect</span></div>
+    <div class="split">
+      <div class="split-card split-green"><strong>Do</strong>Use Optional for method return types to signal "might not have a result". Chain with map/flatMap for clean transformations.</div>
+      <div class="split-card split-red"><strong>Don't</strong>Use Optional as method parameters or as fields. Don't call get() without isPresent() check. Don't wrap things that are never null.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Lambda syntax & functional interfaces</div></div>
+    <div class="code-block"><span class="comment">// Lambda vs method reference — equivalent</span>
+list.forEach(s -> System.out.println(s));
+list.forEach(System.out::println);       <span class="comment">// cleaner</span>
+
+<span class="comment">// Core functional interfaces</span>
+<span class="type">Predicate</span>&lt;<span class="type">T</span>&gt;     fn = t -> <span class="kw">true/false</span>;    <span class="comment">// filter</span>
+<span class="type">Function</span>&lt;<span class="type">T</span>,<span class="type">R</span>&gt;   fn = t -> r;             <span class="comment">// map</span>
+<span class="type">Consumer</span>&lt;<span class="type">T</span>&gt;     fn = t -> {};             <span class="comment">// forEach</span>
+<span class="type">Supplier</span>&lt;<span class="type">T</span>&gt;     fn = () -> t;            <span class="comment">// orElseGet, lazy factory</span>
+<span class="type">BiFunction</span>&lt;<span class="type">T</span>,<span class="type">U</span>,<span class="type">R</span>&gt; fn = (t, u) -> r;   <span class="comment">// two-arg transform</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Streams vs for-loops — tradeoffs</div></div>
+    <div class="split">
+      <div class="split-card split-green"><strong>Streams win</strong>Readability for multi-step transformations. <code>parallelStream()</code> for CPU-bound work on large data. Composability — chain operations without temp variables.</div>
+      <div class="split-card split-red"><strong>For-loop wins</strong>Easier to debug — no lambda stack frames. Better performance for tight loops — streams have overhead. Early <code>break</code>/<code>continue</code> logic that's awkward with streams.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Concurrency -->
+<div id="sec-concurrency" class="section">
+  <div class="section-header">
+    <div class="section-tag">Module 04</div>
+    <div class="section-title">Concurrency Basics</div>
+    <div class="section-sub">synchronized · volatile · ExecutorService</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">synchronized</div>
+      <span class="badge badge-gold">mutual exclusion</span>
+    </div>
+    <p class="body-text">A <code>synchronized</code> method or block acquires an <strong>intrinsic lock (monitor)</strong> on an object. Only one thread can hold that lock at a time — preventing race conditions on shared mutable state.</p>
+    <div class="code-block"><span class="kw">class</span> <span class="type">Counter</span> {
+    <span class="kw">private int</span> count = <span class="num">0</span>;
+
+    <span class="kw">public synchronized void</span> increment() {
+        count++; <span class="comment">// only one thread executes this at a time</span>
+    }
+
+    <span class="comment">// equivalent — explicit block on a specific lock</span>
+    <span class="kw">public void</span> increment() {
+        <span class="kw">synchronized</span> (<span class="kw">this</span>) { count++; }
+    }
+}</div>
+    <div class="tip-box">
+      <div class="tip-label">Cost & alternative</div>
+      <div class="tip-text">Threads block waiting for the lock — contention under load is a bottleneck. For a simple counter, prefer <code>AtomicInteger</code>, which is lock-free and uses hardware CAS (compare-and-swap) instructions.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">volatile</div></div>
+    <p class="body-text"><code>volatile</code> guarantees <strong>visibility</strong> — a write by one thread is immediately visible to all other threads, bypassing CPU cache. It does <strong>not</strong> guarantee atomicity of compound operations like <code>i++</code> (which is read-modify-write).</p>
+    <div class="code-block"><span class="kw">class</span> <span class="type">Worker</span> {
+    <span class="kw">private volatile boolean</span> running = <span class="kw">true</span>; <span class="comment">// visible to all threads</span>
+
+    <span class="kw">public void</span> stop() { running = <span class="kw">false</span>; }
+
+    <span class="kw">public void</span> run() {
+        <span class="kw">while</span> (running) {  <span class="comment">// reads fresh value, not cached</span>
+            doWork();
+        }
+    }
+}</div>
+    <div class="split">
+      <div class="split-card split-green"><strong>Use volatile</strong>Simple status flags written by one thread, read by many. Single write operations where atomicity isn't needed.</div>
+      <div class="split-card split-red"><strong>Don't use volatile</strong>Read-modify-write operations (i++). Multiple variables that must be updated atomically. Use synchronized or Atomic* instead.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">ExecutorService</div>
+      <span class="badge badge-blue">thread pool management</span>
+    </div>
+    <p class="body-text">Managing raw threads is error-prone and doesn't scale. <code>ExecutorService</code> provides a managed thread pool — you submit tasks, the pool handles thread lifecycle.</p>
+    <div class="code-block"><span class="type">ExecutorService</span> pool = Executors.newFixedThreadPool(<span class="num">4</span>);
+
+<span class="comment">// Runnable — fire and forget</span>
+pool.submit(() -> System.out.println(<span class="str">"task"</span>));
+
+<span class="comment">// Callable — returns a result</span>
+<span class="type">Future</span>&lt;<span class="type">Integer</span>&gt; future = pool.submit(() -> {
+    <span class="kw">return</span> expensiveComputation();
+});
+<span class="kw">int</span> result = future.get(); <span class="comment">// blocks until done</span>
+
+<span class="comment">// Always shut down cleanly</span>
+pool.shutdown();
+pool.awaitTermination(<span class="num">5</span>, <span class="type">TimeUnit</span>.SECONDS);</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Factory method</th><th>When to use</th></tr></thead>
+        <tbody>
+          <tr><td>newFixedThreadPool(n)</td><td>CPU-bound tasks — set n = CPU cores</td></tr>
+          <tr><td>newCachedThreadPool()</td><td>Many short-lived tasks — threads expire after 60s idle</td></tr>
+          <tr><td>newSingleThreadExecutor()</td><td>Sequential task queue — guaranteed order</td></tr>
+          <tr><td>newScheduledThreadPool(n)</td><td>Delayed or periodic tasks</td></tr>
+          <tr><td>newVirtualThreadPerTaskExecutor()</td><td>Java 21 — lightweight virtual threads for I/O-bound work</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">synchronized vs volatile vs Atomic — decision matrix</div></div>
+    <div class="split">
+      <div class="split-card split-gold"><strong>synchronized</strong>Full mutual exclusion. Multiple shared variables. Compound operations. Highest overhead.</div>
+      <div class="split-card split-blue"><strong>volatile</strong>Visibility only. Single variable. One-writer / many-readers. Zero locking overhead.</div>
+    </div>
+    <div class="split-card split-green" style="margin-top:10px; border-radius:6px; padding: 0.85rem 1rem; font-size:13px; color:#b0b3c4; line-height:1.6"><strong style="display:block; font-size:12px; font-weight:600; margin-bottom:5px; font-family:var(--mono); color:var(--green)">Atomic (AtomicInteger, AtomicReference…)</strong>Lock-free, uses CAS. Best for counters and single-variable state shared across threads. Better throughput than synchronized under low-to-medium contention. Backed by java.util.concurrent.atomic.</div>
+    <div class="tip-box" style="margin-top:0.75rem">
+      <div class="tip-label">Also worth knowing</div>
+      <div class="tip-text"><strong>ConcurrentHashMap</strong> — thread-safe map with bucket-level locking, much faster than synchronized HashMap. <strong>BlockingQueue</strong> — classic producer-consumer pattern. <strong>CountDownLatch</strong> — wait for N threads to finish. <strong>ReentrantLock</strong> — explicit lock with <code>tryLock()</code> and fairness options.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

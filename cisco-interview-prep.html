@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Interview Prep</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&family=Literata:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #4f8fff;
+    --accent2: #7c5cfc;
+    --gold: #f5c842;
+    --green: #3dd68c;
+    --red: #ff6b6b;
+    --text: #e8eaf0;
+    --muted: #7a8299;
+    --tag-bg: #1e2436;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding-top: 56px;
+    overflow-x: hidden;
+  }
+
+  .page-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    font-family: var(--sans);
+    font-size: 13px;
+    z-index: 1000;
+  }
+  .page-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    font-family: var(--mono);
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .page-nav a:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .page-nav a.home { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+  .page-nav a.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+  .page-nav .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 48px 24px 80px;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .eyebrow::after {
+    content: '';
+    height: 1px;
+    width: 40px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  /* Timeline / Study Plan */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: attr(data-num);
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .phase-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: border-color 0.2s;
+  }
+
+  .phase-card:hover { border-color: #303654; }
+
+  .phase-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding-top: 3px;
+  }
+
+  .phase-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .phase-items {
+    color: var(--muted);
+    font-size: 13.5px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .phase-items li {
+    list-style: none;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .phase-items li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent2);
+  }
+
+  /* Priority badge */
+  .priority {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+
+  .priority.high { background: rgba(255,107,107,0.12); color: var(--red); border: 1px solid rgba(255,107,107,0.2); }
+  .priority.med { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .priority.low { background: rgba(61,214,140,0.1); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+
+  /* Q&A Sections */
+  .topic-block {
+    margin-bottom: 40px;
+  }
+
+  .topic-header {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topic-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+  }
+
+  .topic-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .qa-list {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+
+  .qa-item {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .qa-item:last-child { border-bottom: none; }
+
+  .qa-question {
+    padding: 16px 24px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+
+  .qa-item:hover .qa-question { background: var(--surface); }
+
+  .qa-q-text {
+    font-style: italic;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .qa-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+    line-height: 1.5;
+    transition: transform 0.2s;
+  }
+
+  .qa-item.open .qa-toggle { transform: rotate(45deg); color: var(--accent); }
+
+  .qa-answer {
+    display: none;
+    padding: 0 24px 20px;
+    color: var(--muted);
+    font-size: 13.5px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    line-height: 1.8;
+  }
+
+  .qa-item.open .qa-answer { display: block; }
+
+  .qa-answer strong {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .qa-answer .tip {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(79,143,255,0.06);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* Prompt box */
+  .prompt-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .prompt-header {
+    background: linear-gradient(135deg, rgba(79,143,255,0.12), rgba(124,92,252,0.12));
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prompt-header span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .copy-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: opacity 0.15s;
+  }
+
+  .copy-btn:hover { opacity: 0.85; }
+
+  .prompt-body {
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.9;
+    white-space: pre-wrap;
+  }
+
+  .prompt-body .highlight { color: var(--gold); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* Scroll indicator */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .phase-card, .topic-block, .prompt-box {
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .phase-card:nth-child(1) { animation-delay: 0.05s; }
+  .phase-card:nth-child(2) { animation-delay: 0.1s; }
+  .phase-card:nth-child(3) { animation-delay: 0.15s; }
+  .phase-card:nth-child(4) { animation-delay: 0.2s; }
+  .phase-card:nth-child(5) { animation-delay: 0.25s; }
+img, iframe { max-width: 100%; height: auto; }
+pre, .code-block { overflow-x: auto; white-space: pre; max-width: 100%; word-break: normal; }
+@media (max-width: 480px) {
+  h1 { font-size: clamp(20px, 5vw, 32px); }
+  h2 { font-size: clamp(16px, 4vw, 24px); }
+}
+@media (max-width: 768px) {
+  .container { padding-left: 1rem; padding-right: 1rem; }
+}
+</style>
+</head>
+<body style="padding-top:56px">
+<nav class="page-nav"><a class="home" href="index.html">&larr; Home</a><div class="nav-links"><a href="ai-learning-hub.html">AI Learning Hub</a><a class="active" href="cisco-interview-prep.html">Cisco Interview Prep</a><a href="embedding-space-intuition.html">Embedding Space Intuition</a><a href="java-core-study-guide.html">Java Core Study Guide</a><a href="prompt-engineering-builder.html">Prompt Engineering Builder</a></div></nav>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">Interview Prep</div>
+    <h1>Cisco People IT<br><span>HR AI Platform</span></h1>
+    <p class="subtitle">Raleigh, NC &nbsp;·&nbsp; 2 rounds &nbsp;·&nbsp; Technical + Behavioral</p>
+  </div>
+
+  <!-- Study Plan -->
+  <div class="section-label" data-num="01">Study Plan</div>
+  <div class="phase-grid">
+
+    <div class="phase-card">
+      <div class="phase-day">Day 1–2</div>
+      <div>
+        <div class="phase-title">AI Coding Fluency <span class="priority high">highest priority</span></div>
+        <ul class="phase-items">
+          <li>Document exactly how you use AI tools today (Copilot, ChatGPT, Cursor, etc.)</li>
+          <li>Read up on prompt engineering basics — system prompts, few-shot examples, chain-of-thought</li>
+          <li>Learn what RAG is and why it matters for HR AI (employee Q&A bots, policy search)</li>
+          <li>Study AI bias in HR: why it's regulated, how you'd mitigate it</li>
+          <li>Practice answering "walk me through how you used AI on a recent project"</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 3</div>
+      <div>
+        <div class="phase-title">Java Core Refresh <span class="priority high">high</span></div>
+        <ul class="phase-items">
+          <li>OOP: polymorphism, encapsulation, inheritance, interfaces vs abstract classes</li>
+          <li>Collections: HashMap internals, ArrayList vs LinkedList, when to use each</li>
+          <li>Streams API and lambdas — filter, map, collect, Optional</li>
+          <li>Concurrency basics: synchronized, volatile, ExecutorService</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 4</div>
+      <div>
+        <div class="phase-title">Spring Boot <span class="priority high">high</span></div>
+        <ul class="phase-items">
+          <li>Dependency injection: @Autowired, @Bean, @Component, @Service</li>
+          <li>REST: @RestController, @RequestMapping, ResponseEntity, exception handling</li>
+          <li>@Transactional — propagation, isolation levels, rollback rules</li>
+          <li>Spring Security basics: JWT, filter chain, method-level security</li>
+          <li>Application properties, profiles, actuator endpoints</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 5</div>
+      <div>
+        <div class="phase-title">Angular + Databases <span class="priority med">medium</span></div>
+        <ul class="phase-items">
+          <li>Angular: components, services, RxJS Observables, lifecycle hooks, routing</li>
+          <li>SQL: JOINs, GROUP BY, window functions, query optimization, indexing</li>
+          <li>JPA/Hibernate: entity relationships, lazy vs eager loading, N+1 problem</li>
+          <li>NoSQL basics if relevant: document stores for unstructured HR data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 6–7</div>
+      <div>
+        <div class="phase-title">Behavioral Stories + Mock Run <span class="priority low">round 2</span></div>
+        <ul class="phase-items">
+          <li>Write 5 STAR stories: collaboration, ambiguity, stakeholder conflict, delivery under pressure, failure/learning</li>
+          <li>Tailor at least 2 stories to working with non-technical stakeholders (HR context)</li>
+          <li>Do a full mock technical interview out loud — timing matters</li>
+          <li>Research Cisco's HR AI initiatives and Cisco DNA/Webex AI products</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- AI Q&A -->
+  <div class="section-label" data-num="02">Practice Questions</div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">🤖 AI Coding</div>
+      <div class="topic-tag">Start Here · Most Nervous</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"Walk me through how you actually use AI tools in your day-to-day development work."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Be specific and honest. Mention concrete tools (GitHub Copilot, ChatGPT, Cursor, Tabnine) and concrete use cases: generating boilerplate, writing unit tests, explaining unfamiliar APIs, debugging stack traces, refactoring code. Then add nuance — talk about <strong>when you don't trust it</strong> (security-sensitive code, complex business logic) and how you verify its output. This shows maturity, not just enthusiasm.
+          <div class="tip">💡 Tip: If you mostly use ChatGPT for code help, that's fine — just describe it precisely. "I paste in a failing test and ask it to explain why" is a great answer.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"Have you ever integrated an AI API into an application? Tell me about that experience."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          If yes: describe the API (OpenAI, Anthropic, Azure AI), the use case, how you handled API keys securely, rate limits, error handling, and cost. If no: <strong>be honest but pivot</strong> — "I haven't integrated one in production yet, but I've experimented with [X] and understand the fundamentals: authentication, prompt design, handling streaming responses, and cost management." Then show you know what it takes.
+          <div class="tip">💡 Tip: Even a side project using the OpenAI API counts. If you have time before the interview, build a tiny demo.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"What do you know about Retrieval-Augmented Generation (RAG) and how might it apply to an HR platform?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          RAG = giving an LLM access to your own documents at query time instead of retraining it. For HR: an employee asks "what's our parental leave policy?" — RAG retrieves the relevant policy document from a vector database and feeds it to the LLM as context, so the answer is accurate and up-to-date. Key components to mention: <strong>embedding model, vector store (Pinecone, pgvector, Weaviate), retrieval step, and generation step</strong>. You don't need to have built this — understanding the concept is enough at this stage.
+          <div class="tip">💡 Tip: Cisco's HR AI platform almost certainly uses something like this for policy Q&A. Mentioning that connection impresses interviewers.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"How do you think about bias and fairness when AI is used in HR workflows?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          This is critical for HR AI and shows you understand the domain. Key points: <strong>AI models trained on historical HR data can encode past biases</strong> (hiring, performance reviews, promotions). Mitigation approaches: audit datasets for representation gaps, use fairness metrics (demographic parity, equalized odds), involve diverse reviewers in the loop, keep humans in decision-making for consequential actions. Also mention regulatory context: EEOC guidelines apply, some states regulate AI in hiring. Show you take this seriously.
+          <div class="tip">💡 Tip: This question tests domain awareness, not engineering skill. A thoughtful answer here can differentiate you from purely technical candidates.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"What's prompt engineering and when have you used it?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Prompt engineering is designing the input text to an LLM to get reliable, high-quality outputs. Techniques to mention: <strong>system prompts</strong> (setting context/persona), <strong>few-shot examples</strong> (show the model what you want), <strong>chain-of-thought</strong> (ask it to reason step by step), <strong>output formatting</strong> (ask for JSON, bullet points, etc.), and <strong>temperature control</strong> (lower = more deterministic). Give a concrete example even if small: "I use system prompts when querying ChatGPT for code to constrain it to a specific framework."
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"How do you handle hallucinations or incorrect AI output in production?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Never trust AI output blindly in production. Strategies: <strong>grounding</strong> — use RAG to anchor answers in source documents; <strong>confidence thresholds</strong> — if the model is uncertain, fall back to human review; <strong>output validation</strong> — parse and validate structured outputs before using them; <strong>human-in-the-loop</strong> — for sensitive HR decisions, always require a human sign-off; <strong>monitoring</strong> — log inputs and outputs, track user corrections over time.
+          <div class="tip">💡 Tip: For HR specifically, emphasize human-in-the-loop. No one wants an AI making autonomous hiring or termination decisions.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">☕ Java</div>
+      <div class="topic-tag">Technical Panel</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"What's the difference between an interface and an abstract class? When would you use each?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Interface: defines a contract, no state (before Java 8), supports multiple inheritance, use when unrelated classes share behavior. Abstract class: can have state and concrete methods, single inheritance, use when classes share code and an "is-a" relationship makes sense. Post Java-8: interfaces can have default and static methods, which narrows the gap — but abstract classes still own state.
+          <div class="tip">💡 Example: Runnable is an interface (anything can run). Vehicle might be abstract (Car and Truck share engine logic).</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"Explain the Java Streams API. Write a stream that filters a list of employees and returns their names sorted."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Streams process collections in a declarative, functional style. They're lazy (operations run only at terminal). Example:<br><br>
+          <code>employees.stream()<br>
+          &nbsp;&nbsp;.filter(e -> e.isActive())<br>
+          &nbsp;&nbsp;.map(Employee::getName)<br>
+          &nbsp;&nbsp;.sorted()<br>
+          &nbsp;&nbsp;.collect(Collectors.toList());</code><br><br>
+          Key concepts: intermediate ops (filter, map, sorted) vs terminal ops (collect, forEach, reduce). Parallel streams exist but have overhead.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"How does HashMap work internally in Java?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          HashMap uses an array of buckets. Key is hashed with hashCode() then hash(), then index = hash % capacity. Collisions are handled by chaining (linked list in each bucket, tree after 8 entries in Java 8+). Default capacity is 16, load factor 0.75 — when 75% full, it doubles and rehashes. Thread safety: not thread-safe; use ConcurrentHashMap for concurrent access.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">🌱 Spring Boot</div>
+      <div class="topic-tag">Technical Panel</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"Explain @Transactional. What happens if a checked exception is thrown inside a @Transactional method?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          @Transactional wraps a method in a database transaction. By default, Spring only rolls back on <strong>unchecked exceptions</strong> (RuntimeException and Error). A checked exception will NOT trigger rollback unless you specify rollbackFor. Common gotcha: calling a @Transactional method from within the same class bypasses the proxy — the transaction won't apply.
+          <div class="tip">💡 Tip: This is a very common interview trap. Know the checked vs unchecked rollback difference cold.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"How would you design a secure REST API in Spring Boot for an HR platform?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Cover: <strong>Authentication</strong> (JWT via Spring Security, or OAuth2/OIDC with Cisco's SSO), <strong>Authorization</strong> (@PreAuthorize with roles — HR managers see more than employees), <strong>Input validation</strong> (@Valid, @NotNull, custom validators), <strong>HTTPS only</strong>, <strong>Rate limiting</strong>, <strong>Audit logging</strong> (who accessed what employee data and when — critical for compliance), <strong>CORS</strong> configured properly. Mention GDPR/data sensitivity since it's HR.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">🗄️ Databases</div>
+      <div class="topic-tag">Technical Panel</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"What is the N+1 query problem and how do you solve it in JPA?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          N+1: you query for N records, then for each one, JPA fires an additional query to load a related entity = N+1 total queries. Example: load 100 employees, then load each employee's department separately. Solutions: <strong>JOIN FETCH</strong> in JPQL, <strong>@EntityGraph</strong>, or <strong>batch fetching</strong> with @BatchSize. Use eager loading carefully — it can cause its own problems with large associations.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggle(this)">
+          <span class="qa-q-text">"When would you use a NoSQL database over a relational one?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          NoSQL when: schema is flexible or evolving rapidly (document stores like MongoDB), extremely high write throughput (Cassandra), hierarchical/graph relationships (Neo4j), caching/sessions (Redis). Relational when: data integrity is critical, complex joins are needed, ACID guarantees matter. For HR: core employee records = relational (structured, compliance-sensitive). AI interaction logs or unstructured feedback = could be document store.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Copy Prompt -->
+  <div class="section-label" data-num="03">New Chat Prompt</div>
+  <p style="color: var(--muted); font-size: 13.5px; margin-bottom: 20px;">Paste this into a fresh Claude chat to start a focused AI interview drill session.</p>
+
+  <div class="prompt-box">
+    <div class="prompt-header">
+      <span>Paste into a new chat</span>
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-body" id="promptText">I have a technical interview coming up for a Software Engineer role on Cisco's People IT team, building an HR AI Platform. I want to practice specifically the AI-related questions.
+
+My background: [briefly describe your years of experience and how you currently use AI tools]
+
+Please act as a senior technical interviewer. Ask me one AI-related interview question at a time from the list below, wait for my answer, then give me detailed feedback on what I got right, what I missed, and how a strong candidate would answer it. Be honest and direct — I want to improve.
+
+Questions to cover (rotate through in this order):
+1. Walk me through how you actually use AI tools in your day-to-day development.
+2. Have you ever integrated an AI API into an application? Tell me about it.
+3. What do you know about Retrieval-Augmented Generation and how might it apply to an HR platform?
+4. How do you think about bias and fairness when AI is used in HR workflows?
+5. What is prompt engineering and can you give me a concrete example?
+6. How do you handle hallucinations or incorrect AI output in a production system?
+7. If you were designing a feature on an HR AI platform that uses an LLM to answer employee policy questions, walk me through your technical approach end to end.
+
+After we finish all questions, give me an overall assessment and the top 3 things I should focus on before the interview.
+
+Start with question 1 now.</div>
+  </div>
+
+</div>
+
+<script>
+function toggle(el) {
+  const item = el.closest('.qa-item');
+  item.classList.toggle('open');
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptText').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
