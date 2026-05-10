@@ -1,1 +1,1 @@
-https://yevicki.github.io/cisco/
+https://yevicki.github.io/cisco
