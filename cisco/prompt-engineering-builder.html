@@ -1,0 +1,309 @@
+
+<style>
+:root {
+  --bg: #0e0f14;
+  --surface: #161820;
+  --border: #252730;
+  --border-bright: #353848;
+  --text: #e8e9f0;
+  --muted: #7a7d8f;
+  --accent: #E8B84B;
+  --accent-dim: rgba(232,184,75,0.12);
+  --accent-border: rgba(232,184,75,0.3);
+  --green: #39FF14;
+  --green-dim: rgba(57,255,20,0.1);
+  --blue: #00D9FF;
+  --blue-dim: rgba(0,217,255,0.1);
+  --red: #ff5c5c;
+  --red-dim: rgba(255,92,92,0.1);
+  --radius: 6px;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+body { padding-top: 56px; overflow-x: hidden; }
+.page-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-family: var(--sans);
+  font-size: 13px;
+  z-index: 1000;
+}
+.page-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.page-nav a:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.page-nav a.home { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+.page-nav a.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+.page-nav .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+* { box-sizing: border-box; }
+.pe-wrap { max-width: 900px; width: 100%; margin-left: auto; margin-right: auto; padding: 1rem 1.5rem 2rem; box-sizing: border-box; }
+.step-nav { display: flex; gap: 0; margin-bottom: 2rem; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.step-btn { flex: 1; padding: 10px 8px; font-size: 13px; font-weight: 500; border: none; border-right: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; transition: all .15s; }
+.step-btn:last-child { border-right: none; }
+.step-btn.active { background: var(--color-background-info); color: var(--color-text-info); }
+.step-btn:hover:not(.active) { background: var(--color-background-secondary); }
+.step-num { display: block; font-size: 11px; font-weight: 400; color: inherit; opacity: .7; margin-bottom: 2px; }
+.panel { display: none; }
+.panel.active { display: block; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 520px) { .two-col { grid-template-columns: 1fr; } }
+.col-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.field-group { margin-bottom: 14px; }
+.field-group label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+textarea { width: 100%; font-size: 13px; font-family: var(--font-mono); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; background: var(--color-background-primary); color: var(--color-text-primary); resize: vertical; line-height: 1.6; }
+textarea:focus { outline: none; border-color: var(--color-border-primary); }
+.preview-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; font-size: 12.5px; font-family: var(--font-mono); color: var(--color-text-primary); white-space: pre-wrap; line-height: 1.7; min-height: 80px; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: var(--border-radius-md); margin: 0 2px; font-weight: 500; }
+.tag-sys { background: var(--color-background-info); color: var(--color-text-info); }
+.tag-few { background: var(--color-background-success); color: var(--color-text-success); }
+.tag-cot { background: var(--color-background-warning); color: var(--color-text-warning); }
+.tip-box { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: .75rem 1rem; font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.6; margin-top: 12px; }
+.tip-box strong { color: var(--color-text-primary); font-weight: 500; }
+.shot-pair { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: .75rem 1rem; margin-bottom: 10px; }
+.shot-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
+.shot-row:last-child { margin-bottom: 0; }
+.shot-tag { font-size: 11px; font-weight: 500; min-width: 14px; padding-top: 2px; }
+.shot-q { color: var(--color-text-info); }
+.shot-a { color: var(--color-text-success); }
+.shot-text { font-size: 13px; color: var(--color-text-primary); font-family: var(--font-mono); }
+.add-btn { font-size: 13px; color: var(--color-text-info); background: none; border: 0.5px dashed var(--color-border-info); border-radius: var(--border-radius-md); padding: 6px 14px; cursor: pointer; width: 100%; margin-top: 4px; }
+.add-btn:hover { background: var(--color-background-info); }
+.cot-step { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.cot-num { width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-warning); color: var(--color-text-warning); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cot-input { flex: 1; padding: 6px 10px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); font-family: inherit; }
+.cot-input:focus { outline: none; border-color: var(--color-border-primary); }
+.final-preview { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; }
+.section-block { margin-bottom: 1rem; }
+.section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.copy-btn { margin-top: 12px; padding: 8px 20px; font-size: 13px; cursor: pointer; }
+img, iframe { max-width: 100%; height: auto; }
+pre, .code-block { overflow-x: auto; white-space: pre; max-width: 100%; word-break: normal; }
+@media (max-width: 480px) {
+  h1 { font-size: clamp(20px, 5vw, 32px); }
+  h2 { font-size: clamp(16px, 4vw, 24px); }
+}
+@media (max-width: 768px) {
+  .pe-wrap { padding-left: 1rem; padding-right: 1rem; }
+}
+</style>
+<nav class="page-nav"><a class="home" href="index.html">&larr; Home</a><div class="nav-links"><a href="ai-learning-hub.html">AI Learning Hub</a><a href="cisco-interview-prep.html">Cisco Interview Prep</a><a href="embedding-space-intuition.html">Embedding Space Intuition</a><a href="java-core-study-guide.html">Java Core Study Guide</a><a class="active" href="prompt-engineering-builder.html">Prompt Engineering Builder</a></div></nav>
+<div class="pe-wrap">
+  <h2 class="sr-only">Interactive prompt engineering builder for system prompts, few-shot examples, and chain-of-thought</h2>
+  <div class="step-nav">
+    <button class="step-btn active" onclick="goStep(1,this)"><span class="step-num">Step 1</span>System prompt</button>
+    <button class="step-btn" onclick="goStep(2,this)"><span class="step-num">Step 2</span>Few-shot examples</button>
+    <button class="step-btn" onclick="goStep(3,this)"><span class="step-num">Step 3</span>Chain-of-thought</button>
+    <button class="step-btn" onclick="goStep(4,this)"><span class="step-num">Step 4</span>Full prompt</button>
+  </div>
+
+  <!-- STEP 1: System Prompt -->
+  <div id="s1" class="panel active">
+    <div class="two-col">
+      <div>
+        <div class="col-label">Configure</div>
+        <div class="field-group">
+          <label>Role & persona</label>
+          <textarea id="sp-role" rows="2" oninput="updatePreview()" placeholder="e.g. You are Cisco's HR Policy Assistant…"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Constraints & boundaries</label>
+          <textarea id="sp-constraints" rows="2" oninput="updatePreview()" placeholder="e.g. Answer only using provided documents. Cite every claim."></textarea>
+        </div>
+        <div class="field-group">
+          <label>Tone & format</label>
+          <textarea id="sp-tone" rows="2" oninput="updatePreview()" placeholder="e.g. Tone: professional, empathetic. Always respond in 3 sentences or fewer."></textarea>
+        </div>
+        <div class="field-group">
+          <label>Fallback behaviour</label>
+          <textarea id="sp-fallback" rows="2" oninput="updatePreview()" placeholder="e.g. If you don't know, say so and direct to HRConnect."></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">Live preview</div>
+        <div class="preview-box" id="sp-preview">Fill in the fields on the left to build your system prompt…</div>
+        <div class="tip-box">
+          <strong>What makes a good system prompt?</strong><br>
+          Four ingredients: who the model is, what it can and can't do, how it should sound, and what to do when it's stuck. All four reduce variance across thousands of conversations.
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px">
+      <button onclick="goStep(2, document.querySelectorAll('.step-btn')[1])">Next: few-shot examples →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Few-shot -->
+  <div id="s2" class="panel">
+    <div class="two-col">
+      <div>
+        <div class="col-label">Add example pairs (2–5 is ideal)</div>
+        <div id="shots-list">
+          <div class="shot-pair">
+            <div class="shot-row"><span class="shot-tag shot-q">Q</span><input class="cot-input" placeholder="Employee question…" oninput="updateFewShot()" style="border-color:var(--color-border-info)"></div>
+            <div class="shot-row"><span class="shot-tag shot-a">A</span><input class="cot-input" placeholder="Ideal answer (with citation if possible)…" oninput="updateFewShot()" style="border-color:var(--color-border-success)"></div>
+          </div>
+          <div class="shot-pair">
+            <div class="shot-row"><span class="shot-tag shot-q">Q</span><input class="cot-input" placeholder="Employee question…" oninput="updateFewShot()" style="border-color:var(--color-border-info)"></div>
+            <div class="shot-row"><span class="shot-tag shot-a">A</span><input class="cot-input" placeholder="Ideal answer (with citation if possible)…" oninput="updateFewShot()" style="border-color:var(--color-border-success)"></div>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addShot()"><i class="ti ti-plus" aria-hidden="true"></i> Add another example</button>
+        <div class="tip-box" style="margin-top:14px">
+          <strong>What makes good few-shot examples?</strong><br>
+          Cover your most common case, an edge case, and a refusal (where the bot should say it doesn't know). Vary the phrasing. The model infers the pattern — not just the content.
+        </div>
+      </div>
+      <div>
+        <div class="col-label">Preview</div>
+        <div class="preview-box" id="fs-preview">Add Q&A pairs to see the few-shot block…</div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px">
+      <button onclick="goStep(3, document.querySelectorAll('.step-btn')[2])">Next: chain-of-thought →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Chain-of-thought -->
+  <div id="s3" class="panel">
+    <div class="two-col">
+      <div>
+        <div class="col-label">Define reasoning steps</div>
+        <div id="cot-steps">
+          <div class="cot-step"><div class="cot-num">1</div><input class="cot-input" placeholder="e.g. Identify the employee's location and role" oninput="updateCoT()"></div>
+          <div class="cot-step"><div class="cot-num">2</div><input class="cot-input" placeholder="e.g. Find the relevant policy section" oninput="updateCoT()"></div>
+          <div class="cot-step"><div class="cot-num">3</div><input class="cot-input" placeholder="e.g. Check for exceptions or eligibility criteria" oninput="updateCoT()"></div>
+          <div class="cot-step"><div class="cot-num">4</div><input class="cot-input" placeholder="e.g. State the answer with citation" oninput="updateCoT()"></div>
+        </div>
+        <button class="add-btn" onclick="addCotStep()" style="margin-top:4px"><i class="ti ti-plus" aria-hidden="true"></i> Add reasoning step</button>
+        <div class="tip-box" style="margin-top:14px">
+          <strong>When is chain-of-thought worth it?</strong><br>
+          Use it when correctness depends on multiple conditions — eligibility rules, multi-step policy lookups, compensation disputes. For simple factual Q&A, it adds unnecessary length.
+        </div>
+      </div>
+      <div>
+        <div class="col-label">Preview</div>
+        <div class="preview-box" id="cot-preview">Add reasoning steps to see the chain-of-thought block…</div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px">
+      <button onclick="goStep(4, document.querySelectorAll('.step-btn')[3])">See full prompt →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Full prompt -->
+  <div id="s4" class="panel">
+    <div class="col-label" style="margin-bottom:12px">Your complete prompt</div>
+    <div class="final-preview">
+      <div class="section-block" id="fp-sys">
+        <div class="section-header"><span class="tag tag-sys">System prompt</span></div>
+        <div class="preview-box" id="fp-sys-text" style="background:var(--color-background-primary)">—</div>
+      </div>
+      <div class="section-block" id="fp-few">
+        <div class="section-header"><span class="tag tag-few">Few-shot examples</span></div>
+        <div class="preview-box" id="fp-few-text" style="background:var(--color-background-primary)">—</div>
+      </div>
+      <div class="section-block" id="fp-cot">
+        <div class="section-header"><span class="tag tag-cot">Chain-of-thought instruction</span></div>
+        <div class="preview-box" id="fp-cot-text" style="background:var(--color-background-primary)">—</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="copy-btn" onclick="copyPrompt()"><i class="ti ti-copy" aria-hidden="true"></i> Copy full prompt</button>
+      <button onclick="sendPrompt('Help me test this prompt with a sample employee question about parental leave at Cisco')">Test with a sample question ↗</button>
+    </div>
+    <div id="copy-confirm" style="font-size:12px;color:var(--color-text-success);margin-top:6px;display:none"><i class="ti ti-check" aria-hidden="true"></i> Copied to clipboard</div>
+  </div>
+</div>
+
+<script>
+function goStep(n, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  btn.classList.add('active');
+  if (n === 4) buildFinal();
+}
+
+function updatePreview() {
+  const role = document.getElementById('sp-role').value.trim();
+  const constraints = document.getElementById('sp-constraints').value.trim();
+  const tone = document.getElementById('sp-tone').value.trim();
+  const fallback = document.getElementById('sp-fallback').value.trim();
+  const parts = [role, constraints, tone, fallback].filter(Boolean);
+  document.getElementById('sp-preview').textContent = parts.length ? parts.join('\n') : 'Fill in the fields on the left to build your system prompt…';
+}
+
+function updateFewShot() {
+  const pairs = document.querySelectorAll('#shots-list .shot-pair');
+  let out = '';
+  pairs.forEach((pair, i) => {
+    const q = pair.querySelectorAll('input')[0].value.trim();
+    const a = pair.querySelectorAll('input')[1].value.trim();
+    if (q || a) out += (out ? '\n\n' : '') + `Q: "${q || '…'}"\nA: ${a || '…'}`;
+  });
+  document.getElementById('fs-preview').textContent = out || 'Add Q&A pairs to see the few-shot block…';
+}
+
+function addShot() {
+  const list = document.getElementById('shots-list');
+  const div = document.createElement('div');
+  div.className = 'shot-pair';
+  div.innerHTML = `<div class="shot-row"><span class="shot-tag shot-q">Q</span><input class="cot-input" placeholder="Employee question…" oninput="updateFewShot()" style="border-color:var(--color-border-info)"></div><div class="shot-row"><span class="shot-tag shot-a">A</span><input class="cot-input" placeholder="Ideal answer…" oninput="updateFewShot()" style="border-color:var(--color-border-success)"></div>`;
+  list.appendChild(div);
+}
+
+function updateCoT() {
+  const inputs = document.querySelectorAll('#cot-steps .cot-input');
+  const steps = Array.from(inputs).map((inp, i) => inp.value.trim()).filter(Boolean);
+  if (!steps.length) { document.getElementById('cot-preview').textContent = 'Add reasoning steps to see the chain-of-thought block…'; return; }
+  const stepLines = steps.map((s, i) => `${i+1}. ${s}`).join('\n');
+  document.getElementById('cot-preview').textContent = `Think through this step by step before giving your final answer:\n${stepLines}\n\nFinal answer: [your conclusion]`;
+}
+
+function addCotStep() {
+  const list = document.getElementById('cot-steps');
+  const n = list.querySelectorAll('.cot-step').length + 1;
+  const div = document.createElement('div');
+  div.className = 'cot-step';
+  div.innerHTML = `<div class="cot-num">${n}</div><input class="cot-input" placeholder="Next reasoning step…" oninput="updateCoT()">`;
+  list.appendChild(div);
+}
+
+function buildFinal() {
+  const role = document.getElementById('sp-role').value.trim();
+  const constraints = document.getElementById('sp-constraints').value.trim();
+  const tone = document.getElementById('sp-tone').value.trim();
+  const fallback = document.getElementById('sp-fallback').value.trim();
+  const sysParts = [role, constraints, tone, fallback].filter(Boolean);
+  document.getElementById('fp-sys-text').textContent = sysParts.length ? sysParts.join('\n') : '(not set — go back to Step 1)';
+
+  document.getElementById('fp-few-text').textContent = document.getElementById('fs-preview').textContent || '(not set — go back to Step 2)';
+  document.getElementById('fp-cot-text').textContent = document.getElementById('cot-preview').textContent || '(not set — go back to Step 3)';
+}
+
+function copyPrompt() {
+  const sys = document.getElementById('fp-sys-text').textContent;
+  const few = document.getElementById('fp-few-text').textContent;
+  const cot = document.getElementById('fp-cot-text').textContent;
+  const full = `[SYSTEM PROMPT]\n${sys}\n\n[FEW-SHOT EXAMPLES]\n${few}\n\n[CHAIN-OF-THOUGHT INSTRUCTION]\n${cot}`;
+  navigator.clipboard.writeText(full).then(() => {
+    const c = document.getElementById('copy-confirm');
+    c.style.display = 'block';
+    setTimeout(() => c.style.display = 'none', 2500);
+  });
+}
+</script>

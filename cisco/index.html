@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pages — Workspace Index</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0f14;
+      --surface: #161820;
+      --border: #252730;
+      --border-bright: #353848;
+      --text: #e8e9f0;
+      --muted: #7a7d8f;
+      --accent: #E8B84B;
+      --accent-dim: rgba(232,184,75,0.12);
+      --accent-border: rgba(232,184,75,0.3);
+      --green: #39FF14;
+      --green-dim: rgba(57,255,20,0.1);
+      --blue: #00D9FF;
+      --blue-dim: rgba(0,217,255,0.1);
+      --red: #ff5c5c;
+      --red-dim: rgba(255,92,92,0.1);
+      --radius: 6px;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .sidebar-logo {
+      padding: 0 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .logo-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .sidebar-logo h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 3px;
+    }
+    .sidebar-logo p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .nav-section {
+      padding: 0 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-weight: 500;
+      margin-bottom: 2px;
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--accent-dim);
+      border-color: var(--accent-border);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .content {
+      padding: 2.5rem 3rem;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .section-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .section-tag { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 6px; }
+    .section-title { font-size: 24px; font-weight: 600; color: var(--text); }
+    .section-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .card:hover { border-color: var(--border-bright); }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      font-family: var(--mono);
+    }
+    .preview-wrap {
+      width: 100%;
+      height: 160px;
+      overflow: hidden;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+      position: relative;
+      background: var(--bg);
+    }
+    .preview-wrap iframe {
+      width: 285%;
+      height: 285%;
+      transform: scale(0.35);
+      transform-origin: top left;
+      pointer-events: none;
+      border: none;
+      background: var(--bg);
+    }
+    .card-link {
+      margin-top: 0.5rem;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 13px;
+      text-decoration: none;
+      border-radius: var(--radius);
+      border: 1px solid var(--accent-border);
+      background: var(--accent-dim);
+      padding: 8px 12px;
+      transition: background 0.15s, color 0.15s;
+      font-weight: 500;
+      display: inline-block;
+    }
+    .card-link:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    img, iframe { max-width: 100%; height: auto; }
+    pre, .code-block { overflow-x: auto; white-space: pre; max-width: 100%; word-break: normal; }
+    @media (max-width: 480px) {
+      h1 { font-size: clamp(20px, 5vw, 32px); }
+      h2 { font-size: clamp(16px, 4vw, 24px); }
+    }
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .content { padding: 1.25rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-tag">workspace</div>
+      <h1>Pages</h1>
+      <p id="sidebar-count">html files found</p>
+    </div>
+    <div class="nav-section" id="sidebar-nav">
+      <!-- Nav links injected by JS -->
+    </div>
+  </nav>
+  <main class="content">
+    <div class="section-header">
+      <div class="section-tag">Workspace Index</div>
+      <div class="section-title">All Pages</div>
+      <div class="section-sub">Browse and preview every HTML page in this workspace.</div>
+    </div>
+    <div class="card-grid" id="card-grid">
+      <!-- Cards injected by JS -->
+    </div>
+  </main>
+  <script>
+    // List of HTML files in workspace root (excluding index.html)
+    const files = [
+      "ai-learning-hub.html",
+      "cisco-interview-prep.html",
+      "embedding-space-intuition.html",
+      "java-core-study-guide.html",
+      "prompt-engineering-builder.html"
+    ];
+    function cleanName(filename) {
+      return filename.replace(/\.html$/, '')
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+    // Sidebar nav
+    const nav = document.getElementById('sidebar-nav');
+    files.forEach(f => {
+      const id = 'card-' + f.replace(/\W/g, '');
+      const a = document.createElement('a');
+      a.className = 'nav-item';
+      a.href = '#' + id;
+      a.innerHTML = `<span class="nav-dot"></span> <span>${cleanName(f)}</span>`;
+      a.addEventListener('click', () => {
+        document.getElementById(id).scrollIntoView({behavior:'smooth', block:'center'});
+        // highlight active
+        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+      });
+      nav.appendChild(a);
+    });
+    // Card grid
+    const grid = document.getElementById('card-grid');
+    files.forEach(f => {
+      const id = 'card-' + f.replace(/\W/g, '');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = id;
+      card.innerHTML = `
+        <div class="card-title">${cleanName(f)}</div>
+        <div class="preview-wrap"><iframe src="${f}" scrolling="no" loading="lazy"></iframe></div>
+        <a class="card-link" href="${f}" target="_blank" rel="noopener">Open page &rarr;</a>
+      `;
+      grid.appendChild(card);
+    });
+    // Set sidebar count
+    document.getElementById('sidebar-count').textContent = `${files.length} html files found`;
+  </script>
+</body>
+</html>

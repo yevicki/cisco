@@ -1,0 +1,327 @@
+
+<style>
+:root {
+  --bg: #0e0f14;
+  --surface: #161820;
+  --border: #252730;
+  --border-bright: #353848;
+  --text: #e8e9f0;
+  --muted: #7a7d8f;
+  --accent: #E8B84B;
+  --accent-dim: rgba(232,184,75,0.12);
+  --accent-border: rgba(232,184,75,0.3);
+  --green: #39FF14;
+  --green-dim: rgba(57,255,20,0.1);
+  --blue: #00D9FF;
+  --blue-dim: rgba(0,217,255,0.1);
+  --red: #ff5c5c;
+  --red-dim: rgba(255,92,92,0.1);
+  --radius: 6px;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+body { padding-top: 56px; overflow-x: hidden; }
+.page-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-family: var(--sans);
+  font-size: 13px;
+  z-index: 1000;
+}
+.page-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.page-nav a:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.page-nav a.home { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+.page-nav a.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+.page-nav .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+* { box-sizing: border-box; }
+.hub { max-width: 900px; width: 100%; margin-left: auto; margin-right: auto; padding: 1.5rem 1.5rem 0; box-sizing: border-box; }
+.tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 8px 18px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; color: var(--color-text-secondary); background: var(--color-background-primary); transition: all .15s; }
+.tab.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; font-weight: 500; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); }
+.panel { display: none; }
+.panel.active { display: block; }
+.section-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+.section-sub { font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1.5rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.card-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.card-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.badge { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: var(--border-radius-md); font-weight: 500; }
+.badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.example-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 3px solid var(--color-border-info); }
+.example-box code { font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text-primary); white-space: pre-wrap; line-height: 1.6; display: block; }
+.example-label { font-size: 11px; font-weight: 500; color: var(--color-text-info); margin-bottom: 8px; letter-spacing: .04em; }
+.flow-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 1rem 0; }
+.flow-box { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.flow-arrow { color: var(--color-text-secondary); font-size: 16px; }
+.flow-box.highlight { background: var(--color-background-info); border-color: transparent; color: var(--color-text-info); }
+.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.5rem 0; }
+.risk-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.risk-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.cisco-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1rem; }
+@media (max-width: 480px) { .cisco-row { grid-template-columns: 1fr; } }
+.cisco-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+.cisco-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cisco-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+img, iframe { max-width: 100%; height: auto; }
+pre, .code-block { overflow-x: auto; white-space: pre; max-width: 100%; word-break: normal; }
+@media (max-width: 480px) {
+  h1 { font-size: clamp(20px, 5vw, 32px); }
+  h2 { font-size: clamp(16px, 4vw, 24px); }
+}
+@media (max-width: 768px) {
+  .hub { padding: 1rem 1rem 0; }
+}</style>
+<nav class="page-nav"><a class="home" href="index.html">&larr; Home</a><div class="nav-links"><a class="active" href="ai-learning-hub.html">AI Learning Hub</a><a href="cisco-interview-prep.html">Cisco Interview Prep</a><a href="embedding-space-intuition.html">Embedding Space Intuition</a><a href="java-core-study-guide.html">Java Core Study Guide</a><a href="prompt-engineering-builder.html">Prompt Engineering Builder</a></div></nav>
+<div class="hub">
+  <h2 class="sr-only">AI & HR learning hub covering prompt engineering, RAG, and AI bias</h2>
+  <div class="tabs">
+    <button class="tab active" onclick="show('pe')">Prompt engineering</button>
+    <button class="tab" onclick="show('rag')">RAG for HR AI</button>
+    <button class="tab" onclick="show('bias')">AI bias in HR</button>
+  </div>
+
+  <!-- PANEL 1: Prompt Engineering -->
+  <div id="pe" class="panel active">
+    <p class="section-title">Prompt engineering basics</p>
+    <p class="section-sub">The three foundational techniques — and how Cisco could apply them.</p>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">Technique 1</div>
+        <div class="card-title">System prompts</div>
+        <div class="card-desc">Instructions that define the model's role, tone, constraints, and knowledge scope before any user input arrives.</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Technique 2</div>
+        <div class="card-title">Few-shot examples</div>
+        <div class="card-desc">Showing the model 2–5 input/output pairs so it infers the pattern — no fine-tuning needed.</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Technique 3</div>
+        <div class="card-title">Chain-of-thought</div>
+        <div class="card-desc">Asking the model to reason step-by-step before giving a final answer. Reduces errors on complex tasks.</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-label">SYSTEM PROMPT — Cisco HR assistant example</div>
+      <code>You are Cisco's HR Policy Assistant. Answer only using the documents provided.
+Cite the specific policy section for every factual claim.
+If a question is outside your knowledge, say so and direct the employee to HRConnect.
+Tone: clear, professional, empathetic.</code>
+    </div>
+
+    <div class="example-box">
+      <div class="example-label">FEW-SHOT — Benefits eligibility classifier</div>
+      <code>Q: "Am I eligible for tuition reimbursement if I started 3 months ago?"
+A: No — Policy §7.2 requires 6 months of tenure before tuition benefits apply.
+
+Q: "Can I enroll in dental mid-year?"
+A: Only during a qualifying life event (§4.1). Open enrollment is your next opportunity.
+
+Q: [new employee question here]</code>
+    </div>
+
+    <div class="example-box">
+      <div class="example-label">CHAIN-OF-THOUGHT — Compensation dispute</div>
+      <code>Let's work through this step by step.
+1. What is the employee's grade band and location?
+2. What does the compensation framework say for that band?
+3. Does the claimed discrepancy fall outside the published range?
+4. What escalation path applies?
+Final answer: [conclusion with reasoning]</code>
+    </div>
+
+    <hr class="divider">
+    <p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px">Cisco applications</p>
+    <div class="cisco-row">
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#378ADD"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Internal HR chatbot</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">System prompt encodes Cisco's tone guidelines and compliance boundaries. Few-shot examples train it on common benefits Q&A patterns without model retraining.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#1D9E75"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Manager decision support</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Chain-of-thought prompts guide managers through structured reasoning on performance reviews, reducing inconsistency across 40,000+ employees globally.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#BA7517"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Recruiter assist</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Few-shot examples show what a strong vs. weak candidate summary looks like, producing consistent output across Cisco's global TA team without baking in criteria explicitly.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#D4537E"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Policy update rollouts</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Update the system prompt when policy changes — no retraining or redeployment. New context takes effect immediately, keeping the assistant accurate post-policy refresh.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: RAG -->
+  <div id="rag" class="panel">
+    <p class="section-title">Retrieval-augmented generation (RAG)</p>
+    <p class="section-sub">Why grounding AI answers in real documents matters — especially for HR.</p>
+
+    <div class="flow-row">
+      <div class="flow-box">Employee question</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">Retrieve relevant docs</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Pass to LLM with context</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Grounded answer + citation</div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">Without RAG</div>
+        <div class="card-title">Model hallucination risk</div>
+        <div class="card-desc">The LLM answers from training data — which may be outdated, generic, or simply wrong for Cisco's specific policies.</div>
+      </div>
+      <div class="card">
+        <div class="card-label">With RAG</div>
+        <div class="card-title">Answers from your docs</div>
+        <div class="card-desc">The model retrieves chunks from Cisco's own HR documents first, then synthesises an answer — with a citable source.</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Key benefit</div>
+        <div class="card-title">Always current</div>
+        <div class="card-desc">Update the document index when policy changes and every answer is immediately up to date — no model retraining.</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-label">RAG IN ACTION — Employee asking about parental leave</div>
+      <code>Employee: "How many weeks of parental leave do I get?"
+
+Step 1 — Retrieve: system searches Cisco Benefits Guide 2025, §9.3
+Step 2 — Context: [relevant policy chunk injected into prompt]
+Step 3 — Generate: "Per Cisco's Benefits Guide §9.3, full-time employees
+are eligible for 20 weeks of paid parental leave, regardless of gender.
+Part-time eligibility is prorated by FTE percentage."</code>
+    </div>
+
+    <hr class="divider">
+    <p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px">Cisco HR use cases for RAG</p>
+    <div class="cisco-row">
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#378ADD"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Employee Q&A bot</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Index Cisco's benefits guides, handbook, and HR FAQs. Employees get instant, cited answers instead of waiting for HR tickets — reducing tier-1 HR volume significantly.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#1D9E75"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Policy search</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Replace keyword search on the intranet with semantic retrieval. Employees find the right section of the right policy even when they don't know the exact terminology.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#BA7517"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Manager guides</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Index manager playbooks, leadership frameworks, and escalation procedures. Supports consistent management decisions across Cisco's distributed leadership team.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#D4537E"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Global compliance</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Separate document indices per jurisdiction (US, EU, APAC). The bot retrieves region-specific policy based on the employee's location — avoiding cross-border compliance errors.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: AI Bias -->
+  <div id="bias" class="panel">
+    <p class="section-title">AI bias in HR</p>
+    <p class="section-sub">Why it's regulated, where it surfaces, and how to mitigate it.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div style="margin-bottom:8px"><span class="badge badge-red">Regulated</span></div>
+        <div class="card-title">Why it's a legal issue</div>
+        <div class="card-desc">Title VII, the EEOC's 2023 AI guidance, NYC Local Law 144, and the EU AI Act all treat AI-driven HR decisions as high-risk. Discriminatory output — even unintentional — creates employer liability.</div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:8px"><span class="badge badge-amber">Risk</span></div>
+        <div class="card-title">Where bias enters</div>
+        <div class="card-desc">Training data that reflects historical hiring patterns, proxy features (zip code, school name) that correlate with protected class, and feedback loops that reinforce past decisions.</div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:8px"><span class="badge badge-green">Mitigation</span></div>
+        <div class="card-title">What you can do</div>
+        <div class="card-desc">Bias audits before deployment, disparate impact testing, human-in-the-loop for consequential decisions, and explainability requirements so decisions can be challenged.</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-label">REAL-WORLD PRECEDENT</div>
+      <code>Amazon (2018): Scrapped an AI recruiting tool after discovering it
+penalised CVs that contained the word "women's" (e.g. women's chess club)
+— because it was trained on 10 years of predominantly male hire data.
+
+Lesson: A model can be technically accurate on its training distribution
+and still be systematically biased against protected groups.</code>
+    </div>
+
+    <hr class="divider">
+    <p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px">Mitigation framework</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem">
+      <div class="risk-row">
+        <div class="risk-icon" style="background:var(--color-background-info)"><i class="ti ti-search" style="color:var(--color-text-info);font-size:15px" aria-hidden="true"></i></div>
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">Pre-deployment bias audit</p><p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Measure disparate impact across protected groups before any model goes live. Use standard metrics: selection rate ratios, false positive/negative rates by subgroup.</p></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon" style="background:var(--color-background-success)"><i class="ti ti-user-check" style="color:var(--color-text-success);font-size:15px" aria-hidden="true"></i></div>
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">Human-in-the-loop for consequential decisions</p><p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">AI shortlisting, performance scoring, and pay recommendations must have a human reviewer who can override. AI should inform, not decide, on protected-class-adjacent outcomes.</p></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon" style="background:var(--color-background-warning)"><i class="ti ti-file-description" style="color:var(--color-text-warning);font-size:15px" aria-hidden="true"></i></div>
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">Explainability & documentation</p><p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Every AI-assisted HR decision needs a documented rationale. NYC LL144 already mandates annual bias audits and candidate disclosure for automated employment tools.</p></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon" style="background:var(--color-background-danger)"><i class="ti ti-refresh" style="color:var(--color-text-danger);font-size:15px" aria-hidden="true"></i></div>
+        <div><p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 2px">Ongoing monitoring</p><p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Bias can drift as the workforce and world change. Continuous monitoring for outcome disparities, with quarterly reviews and a clear trigger for model retraining or removal.</p></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px">Cisco context</p>
+    <div class="cisco-row">
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#378ADD"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Recruiting automation</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Any AI resume screener or interview scorer must be audited before deployment under NYC LL144 if used for NYC-based roles — and Cisco's global commitments likely extend this further.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#1D9E75"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Performance management</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">AI-assisted performance scoring must be tested for gender and ethnicity bias across Cisco's 85,000-person workforce before influencing comp, promotions, or PIPs.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#BA7517"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Pay equity tools</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">AI tools that model compensation ranges must be validated for disparate impact on protected classes — especially given Cisco's public pay equity commitments and EEOC scrutiny.</p>
+      </div>
+      <div class="cisco-card">
+        <div class="cisco-card-head"><div class="cisco-dot" style="background:#D4537E"></div><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Responsible AI charter</span></div>
+        <p style="font-size:12.5px;color:var(--color-text-secondary);margin:0;line-height:1.6">Cisco's existing Responsible AI framework and Ethics team can own the HR bias audit process — aligning AI governance for HR tools with the broader enterprise standard already in place.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
