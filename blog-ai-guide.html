@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI in HR: A Field Guide for the Working Professional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1814;
+    --ink-mid: #4a4640;
+    --ink-light: #8a8480;
+    --paper: #f8f5f0;
+    --paper-dark: #ede9e2;
+    --accent: #c4530a;
+    --accent-light: #f0e0d4;
+    --accent-green: #2d6a4f;
+    --accent-green-light: #d8ede4;
+    --accent-blue: #1a4f7a;
+    --accent-blue-light: #dce8f2;
+    --accent-amber: #b5620a;
+    --accent-amber-light: #faecd8;
+    --accent-purple: #5a3e8a;
+    --accent-purple-light: #ede5f7;
+    --rule: rgba(26,24,20,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.015) 40px,
+      rgba(255,255,255,0.015) 41px
+    );
+  }
+  .header-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-label::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    color: var(--paper);
+  }
+  .header-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: rgba(248,245,240,0.65);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: rgba(248,245,240,0.45);
+    text-transform: uppercase;
+  }
+  .meta-item span {
+    color: rgba(248,245,240,0.75);
+    display: block;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--paper-dark);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    text-decoration: none;
+    padding: 16px 20px 14px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  nav a:hover { color: var(--ink); border-color: var(--accent); }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 40px 100px;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding-top: 72px;
+  }
+  .section-marker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .section-tagline {
+    font-style: italic;
+    color: var(--ink-light);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 40px 0 12px;
+  }
+
+  p { margin-bottom: 20px; color: var(--ink-mid); }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── TECHNIQUE CARDS ── */
+  .technique-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .technique-card {
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    padding: 20px;
+    border-radius: 2px;
+  }
+  .technique-card .tc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .technique-card .tc-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .technique-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+    color: var(--ink-light);
+  }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--ink);
+    border-radius: 4px;
+    margin: 24px 0;
+    overflow: hidden;
+  }
+  .code-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 10px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+  }
+  .code-block pre {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: rgba(248,245,240,0.82);
+    padding: 18px 20px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    margin: 28px 0;
+    padding: 20px 24px;
+    border-radius: 3px;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .callout p { margin-bottom: 0; font-size: inherit; }
+  .callout-orange {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    color: var(--ink-mid);
+  }
+  .callout-green {
+    background: var(--accent-green-light);
+    border-left: 3px solid var(--accent-green);
+    color: var(--ink-mid);
+  }
+  .callout-blue {
+    background: var(--accent-blue-light);
+    border-left: 3px solid var(--accent-blue);
+    color: var(--ink-mid);
+  }
+  .callout-amber {
+    background: var(--accent-amber-light);
+    border-left: 3px solid var(--accent-amber);
+    color: var(--ink-mid);
+  }
+  .callout-purple {
+    background: var(--accent-purple-light);
+    border-left: 3px solid var(--accent-purple);
+    color: var(--ink-mid);
+  }
+  .callout strong {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+    padding: 20px;
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  .flow-node {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 7px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .flow-node.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .flow-arrow {
+    color: var(--ink-light);
+    font-size: 0.85rem;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    font-size: 0.88rem;
+  }
+  .compare-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper-dark);
+  }
+  .compare-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-mid);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--paper-dark); }
+  .compare-table td:first-child {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .level-high { color: var(--accent-green); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  .level-med  { color: var(--accent-amber); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  .level-low  { color: var(--ink-light);   font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+
+  /* ── SKILL CHECKLIST ── */
+  .skill-list {
+    list-style: none;
+    margin: 20px 0;
+  }
+  .skill-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+    color: var(--ink-mid);
+    line-height: 1.55;
+  }
+  .skill-list li:last-child { border-bottom: none; }
+  .skill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .skill-dot.green { background: var(--accent-green); }
+  .skill-dot.blue  { background: var(--accent-blue); }
+  .skill-dot.amber { background: var(--accent-amber); }
+
+  /* ── RESOURCES ── */
+  .resource-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 24px 0;
+  }
+  @media (max-width: 560px) { .resource-grid { grid-template-columns: 1fr; } }
+  .resource-card {
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 16px 18px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    display: block;
+  }
+  .resource-card:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .resource-card .rc-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .resource-card .rc-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .resource-card .rc-desc {
+    font-size: 0.78rem;
+    color: var(--ink-light);
+    line-height: 1.5;
+    font-family: 'Lora', serif;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 52px 0 0;
+  }
+
+  /* ── PULLQUOTE ── */
+  blockquote {
+    margin: 32px 0;
+    padding: 24px 28px;
+    border-left: 3px solid var(--ink);
+    background: var(--paper-dark);
+  }
+  blockquote p {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  blockquote cite {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    font-style: normal;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: rgba(248,245,240,0.45);
+    padding: 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  footer strong { color: rgba(248,245,240,0.75); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header, nav { padding-left: 20px; padding-right: 20px; }
+    main { padding-left: 20px; padding-right: 20px; }
+    h1 { font-size: 2rem; }
+    .technique-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-label">Field guide · AI &amp; HR technology</div>
+    <h1>AI in HR:<br>A Field Guide for the Working Professional</h1>
+    <p class="header-sub">Prompt engineering, RAG, AI bias, and the career landscape — everything you need to go from concept to capability.</p>
+    <div class="header-meta">
+      <div class="meta-item">Topics covered <span>4 core areas</span></div>
+      <div class="meta-item">Reading time <span>~25 min</span></div>
+      <div class="meta-item">Last updated <span>May 2026</span></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#prompt-engineering">Prompt engineering</a>
+    <a href="#rag">RAG</a>
+    <a href="#bias">AI bias</a>
+    <a href="#careers">Career paths</a>
+    <a href="#domain">Domain expertise</a>
+    <a href="#what-to-learn">What to learn next</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ── SECTION 1: PROMPT ENGINEERING ── -->
+  <section id="prompt-engineering">
+    <div class="section-marker">
+      <span class="section-num">01</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>Prompt engineering</h2>
+    <p class="section-tagline">The art and science of instructing AI models to behave the way you need them to.</p>
+
+    <p>Prompt engineering is about shaping how an AI model behaves without retraining it. Rather than modifying the underlying model — an expensive, slow process — you change the instructions the model receives. Three techniques form the foundation of everything built on top of large language models today.</p>
+
+    <div class="technique-grid">
+      <div class="technique-card">
+        <div class="tc-label">Technique 01</div>
+        <div class="tc-title">System prompts</div>
+        <p>Instructions that define the model's role, tone, constraints, and knowledge scope before any user input arrives. The model reads these first, every time.</p>
+      </div>
+      <div class="technique-card">
+        <div class="tc-label">Technique 02</div>
+        <div class="tc-title">Few-shot examples</div>
+        <p>Showing the model 2–5 input/output pairs so it infers the correct pattern — no fine-tuning or retraining required.</p>
+      </div>
+      <div class="technique-card">
+        <div class="tc-label">Technique 03</div>
+        <div class="tc-title">Chain-of-thought</div>
+        <p>Asking the model to reason step-by-step before giving a final answer. Dramatically reduces errors on complex or multi-step tasks.</p>
+      </div>
+    </div>
+
+    <h3>System prompt — Cisco HR assistant example</h3>
+    <div class="code-block">
+      <div class="code-label">System prompt</div>
+      <pre>You are Cisco's HR Policy Assistant. Answer only using the documents provided.
+Cite the specific policy section for every factual claim.
+If a question is outside your knowledge, say so and direct the employee to HRConnect.
+Tone: clear, professional, empathetic.</pre>
+    </div>
+
+    <h3>Few-shot — benefits eligibility classifier</h3>
+    <div class="code-block">
+      <div class="code-label">Few-shot examples</div>
+      <pre>Q: "Am I eligible for tuition reimbursement if I started 3 months ago?"
+A: No — Policy §7.2 requires 6 months of tenure before tuition benefits apply.
+
+Q: "Can I enroll in dental mid-year?"
+A: Only during a qualifying life event (§4.1). Open enrollment is your next opportunity.
+
+Q: [new employee question here]</pre>
+    </div>
+
+    <h3>Chain-of-thought — compensation dispute</h3>
+    <div class="code-block">
+      <div class="code-label">Chain-of-thought prompt</div>
+      <pre>Let's work through this step by step.
+1. What is the employee's grade band and location?
+2. What does the compensation framework say for that band?
+3. Does the claimed discrepancy fall outside the published range?
+4. What escalation path applies?
+Final answer: [conclusion with reasoning]</pre>
+    </div>
+
+    <div class="callout callout-orange">
+      <strong>Key insight</strong>
+      <p>The most powerful property of system prompts for enterprise use: you can update them the moment a policy changes. No engineering sprint, no model retraining. The new context takes effect immediately across every interaction.</p>
+    </div>
+
+    <h3>Cisco applications</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot"></span><div><strong>Internal HR chatbot:</strong> System prompt encodes Cisco's tone guidelines and compliance boundaries. Few-shot examples train it on common benefits Q&amp;A patterns without model retraining.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Manager decision support:</strong> Chain-of-thought prompts guide managers through structured reasoning on performance reviews, reducing inconsistency across 40,000+ employees globally.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Recruiter assist:</strong> Few-shot examples show what a strong vs. weak candidate summary looks like — producing consistent output across Cisco's global TA team without baking in criteria explicitly.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Policy update rollouts:</strong> Update the system prompt when policy changes. No redeployment needed. New context is live immediately.</div></li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 2: RAG ── -->
+  <section id="rag">
+    <div class="section-marker">
+      <span class="section-num">02</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>Retrieval-augmented generation (RAG)</h2>
+    <p class="section-tagline">Why grounding AI answers in real documents matters — especially for HR.</p>
+
+    <p>RAG solves a fundamental limitation of general-purpose AI: it doesn't know your documents. Rather than hoping the model memorized your benefits guide during training, RAG retrieves the relevant chunks from your own document index first, then passes them to the model as context. The answer is grounded in your actual policies, comes with a citable source, and stays current as long as you keep the index updated.</p>
+
+    <div class="flow">
+      <span class="flow-node">Employee question</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node active">Retrieve relevant docs</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node">Pass to LLM with context</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node">Grounded answer + citation</span>
+    </div>
+
+    <h3>Without RAG vs. with RAG</h3>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Without RAG</th>
+          <th>With RAG</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Knowledge source</td>
+          <td>Training data — may be outdated or generic</td>
+          <td>Your actual documents, updated in real time</td>
+        </tr>
+        <tr>
+          <td>Hallucination risk</td>
+          <td>High — model fills gaps with plausible-sounding text</td>
+          <td>Low — answers grounded in retrieved chunks</td>
+        </tr>
+        <tr>
+          <td>Citations</td>
+          <td>None</td>
+          <td>Specific section reference per answer</td>
+        </tr>
+        <tr>
+          <td>Policy updates</td>
+          <td>Requires model retraining</td>
+          <td>Update the document index — done</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>RAG in action — parental leave question</h3>
+    <div class="code-block">
+      <div class="code-label">RAG pipeline walkthrough</div>
+      <pre>Employee: "How many weeks of parental leave do I get?"
+
+Step 1 — Retrieve: system searches Cisco Benefits Guide 2025, §9.3
+Step 2 — Context: [relevant policy chunk injected into prompt]
+Step 3 — Generate: "Per Cisco's Benefits Guide §9.3, full-time employees
+are eligible for 20 weeks of paid parental leave, regardless of gender.
+Part-time eligibility is prorated by FTE percentage."</pre>
+    </div>
+
+    <p>The difference for an employee: instead of "it depends," they get a cited, policy-specific answer in seconds — without opening a ticket.</p>
+
+    <div class="callout callout-green">
+      <strong>Why this matters for HR specifically</strong>
+      <p>Wrong HR answers have real consequences — for employees in distress, for legal compliance, for manager decisions. RAG is the mechanism that makes AI answers trustworthy enough to use in consequential contexts.</p>
+    </div>
+
+    <h3>Cisco HR use cases for RAG</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot green"></span><div><strong>Employee Q&amp;A bot:</strong> Index Cisco's benefits guides, handbook, and HR FAQs. Employees get instant, cited answers instead of waiting for HR tickets — reducing tier-1 HR volume significantly.</div></li>
+      <li><span class="skill-dot green"></span><div><strong>Policy search:</strong> Replace keyword search on the intranet with semantic retrieval. Employees find the right section even when they don't know the exact terminology.</div></li>
+      <li><span class="skill-dot green"></span><div><strong>Manager guides:</strong> Index playbooks, leadership frameworks, and escalation procedures. Supports consistent decisions across Cisco's distributed leadership team.</div></li>
+      <li><span class="skill-dot green"></span><div><strong>Global compliance:</strong> Separate document indices per jurisdiction (US, EU, APAC). The bot retrieves region-specific policy based on the employee's location — avoiding cross-border compliance errors.</div></li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 3: AI BIAS ── -->
+  <section id="bias">
+    <div class="section-marker">
+      <span class="section-num">03</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>AI bias in HR</h2>
+    <p class="section-tagline">Why it's regulated, where it surfaces, and how to mitigate it — practically.</p>
+
+    <p>AI bias in HR is both a technical and a legal challenge. Bias typically enters through training data that reflects past (and often discriminatory) hiring or promotion patterns, or through proxy variables that correlate with protected characteristics even when those characteristics aren't explicitly included.</p>
+
+    <h3>Why it's regulated</h3>
+    <p>Title VII, the EEOC's 2023 AI guidance, NYC Local Law 144, and the EU AI Act all treat AI-driven HR decisions as high-risk. Discriminatory output — even unintentional — creates employer liability. NYC LL144 already mandates annual bias audits and candidate disclosure for any automated employment tool used in hiring for NYC-based roles.</p>
+
+    <blockquote>
+      <p>"Amazon scrapped an AI recruiting tool after discovering it penalised CVs that contained the word 'women's' — because it was trained on 10 years of predominantly male hire data."</p>
+      <cite>Reuters, 2018 — a foundational case study in AI hiring bias</cite>
+    </blockquote>
+
+    <div class="callout callout-amber">
+      <strong>The core lesson</strong>
+      <p>A model can be technically accurate on its training distribution and still be systematically biased against protected groups. Statistical performance and fairness are not the same thing.</p>
+    </div>
+
+    <h3>Where bias enters</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot amber"></span><div><strong>Historical training data:</strong> If past hiring decisions were biased (and most were), models trained on that data will reproduce those patterns.</div></li>
+      <li><span class="skill-dot amber"></span><div><strong>Proxy features:</strong> Zip code, school name, graduation year, and gap years all correlate with protected class and can act as stand-ins even when race or gender are excluded explicitly.</div></li>
+      <li><span class="skill-dot amber"></span><div><strong>Feedback loops:</strong> When a biased model's outputs are used to generate future training data, the bias compounds over time.</div></li>
+    </ul>
+
+    <h3>Mitigation framework</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot blue"></span><div><strong>Pre-deployment bias audit:</strong> Measure disparate impact across protected groups before any model goes live. Use standard metrics: selection rate ratios, false positive/negative rates by subgroup.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Human-in-the-loop for consequential decisions:</strong> AI shortlisting, performance scoring, and pay recommendations must have a human reviewer who can override. AI should inform, not decide, on protected-class-adjacent outcomes.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Explainability and documentation:</strong> Every AI-assisted HR decision needs a documented rationale. This is both a governance best practice and, increasingly, a legal requirement.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Ongoing monitoring:</strong> Bias can drift as the workforce and world change. Continuous monitoring for outcome disparities, with quarterly reviews and a clear trigger for model retraining or removal.</div></li>
+    </ul>
+
+    <h3>Cisco context</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot"></span><div><strong>Recruiting automation:</strong> Any AI resume screener or interview scorer must be audited before deployment under NYC LL144 for NYC-based roles — and Cisco's global commitments likely extend this further.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Performance management:</strong> AI-assisted performance scoring must be tested for gender and ethnicity bias across Cisco's 85,000-person workforce before influencing compensation, promotions, or PIPs.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Pay equity tools:</strong> AI tools that model compensation ranges must be validated for disparate impact — especially given Cisco's public pay equity commitments and EEOC scrutiny.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Responsible AI charter:</strong> Cisco's existing Responsible AI framework and Ethics team can own the HR bias audit process — aligning AI governance for HR tools with the broader enterprise standard already in place.</div></li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 4: CAREER PATHS ── -->
+  <section id="careers">
+    <div class="section-marker">
+      <span class="section-num">04</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>The four AI career paths</h2>
+    <p class="section-tagline">What the market is actually hiring for in 2026 — and how the roles differ.</p>
+
+    <p>The title "Prompt Engineer" has largely evolved into something more substantial. The underlying skills — understanding model behavior, evaluating output quality, designing guardrails — got redistributed into four distinct roles that are growing with real budget behind them.</p>
+
+    <p>Think of them as a spectrum from "builds the system" to "judges the system."</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Core question</th>
+          <th>What you do</th>
+          <th>Technical level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AI Systems Engineer</td>
+          <td>Can I build this?</td>
+          <td>Design and ship RAG pipelines, agentic workflows, API integrations. Closest to a traditional SWE role. Python, vector databases, cloud deployment, LLM APIs all required.</td>
+          <td><span class="level-high">High</span></td>
+        </tr>
+        <tr>
+          <td>LLM Quality Specialist</td>
+          <td>Does this work consistently?</td>
+          <td>Design test suites that run model outputs against expected behavior at scale. Sits between product and engineering running systematic evaluations. Requires Python basics and evaluation frameworks.</td>
+          <td><span class="level-med">Medium</span></td>
+        </tr>
+        <tr>
+          <td>AI Output Evaluator</td>
+          <td>Is this specific output good?</td>
+          <td>Review actual AI outputs and judge whether they're accurate, fair, on-policy, and appropriate. Often involves human review of flagged outputs that automated testing can't catch.</td>
+          <td><span class="level-low">Low–Medium</span></td>
+        </tr>
+        <tr>
+          <td>AI Systems Auditor</td>
+          <td>Is this system legally defensible?</td>
+          <td>Evaluate entire AI pipelines for accuracy, bias, hallucination rates, and compliance with laws like the EU AI Act or NYC LL144. Produces documented audit trails.</td>
+          <td><span class="level-med">Medium (governance-heavy)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <strong>The governance track is growing fastest</strong>
+      <p>The EU AI Act and US federal AI governance requirements are creating legal demand for documented human oversight in high-risk AI applications. AI Systems Auditor and AI Output Evaluator roles in healthcare, legal, financial services, and enterprise — like Cisco — aren't just business preferences anymore. They're legally required in many contexts.</p>
+    </div>
+
+    <h3>What the market is actually paying (US, 2026)</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot"></span><div><strong>Junior / no prior AI job:</strong> $60,000–$95,000</div></li>
+      <li><span class="skill-dot"></span><div><strong>Mid-level (1–2 years experience):</strong> $100,000–$160,000</div></li>
+      <li><span class="skill-dot"></span><div><strong>Senior AI engineer:</strong> $160,000–$250,000+, often with equity at AI startups</div></li>
+      <li><span class="skill-dot"></span><div><strong>Average AI engineer salary (2025):</strong> $206,000 — up $50,000 year over year</div></li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 5: DOMAIN EXPERTISE ── -->
+  <section id="domain">
+    <div class="section-marker">
+      <span class="section-num">05</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>What "domain expertise" actually means</h2>
+    <p class="section-tagline">Why your HR background is an asset in AI hiring — not a gap to explain away.</p>
+
+    <p>"Domain" means the industry or subject matter the AI is being applied to — not the AI itself. When job listings say "we want domain experts," they mean: we can teach you the LLM tooling, but we can't easily teach you 10 years of knowing how HR, healthcare, finance, or legal actually works.</p>
+
+    <blockquote>
+      <p>"Over 75% of AI job listings now ask for domain experts, not generalists. That is why some engineers clear $300K while others stall at half that number."</p>
+      <cite>Second Talent, AI Engineering Skills Report, 2026</cite>
+    </blockquote>
+
+    <h3>Your domain: enterprise HR at scale</h3>
+    <p>Based on this conversation, your domain is HR and enterprise workforce operations. That includes knowing:</p>
+
+    <ul class="skill-list">
+      <li><span class="skill-dot green"></span><div>How HR policies are structured, versioned, and updated</div></li>
+      <li><span class="skill-dot green"></span><div>What employees actually ask and why — including the emotional context behind questions about FMLA, PIPs, or compensation</div></li>
+      <li><span class="skill-dot green"></span><div>How employment law interacts with technology decisions — what a wrong answer about FMLA eligibility actually costs</div></li>
+      <li><span class="skill-dot green"></span><div>The difference between what a manager needs and what an employee needs from the same policy document</div></li>
+      <li><span class="skill-dot green"></span><div>How HR functions operate at scale — jurisdiction differences, global vs. local policy, escalation paths</div></li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <strong>The competitive advantage</strong>
+      <p>Most AI engineers can build a RAG pipeline over any document corpus. Very few understand that an HR benefits bot needs to handle jurisdiction-specific policy differences, that certain outputs create legal liability, that employees asking about FMLA or PIP processes are often in distress, or that a wrong answer about compensation has real consequences for a real person. That's what domain expertise provides — and it's genuinely rare in AI hiring right now.</p>
+    </div>
+
+    <p>For Cisco specifically, your domain could be positioned as <strong>enterprise HR AI for large global workforces</strong> — a more defensible and valuable niche than "HR tech" generally, and one where Cisco's scale makes the problems non-trivial.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 6: WHAT TO LEARN ── -->
+  <section id="what-to-learn">
+    <div class="section-marker">
+      <span class="section-num">06</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>What to learn next</h2>
+    <p class="section-tagline">The concrete technical skills needed to claim this role — in order of priority.</p>
+
+    <p>The conceptual knowledge from this guide covers roughly the top of the job description. What the market also expects is the ability to build what you understand. Here's the gap, filled in order of priority.</p>
+
+    <h3>The technical stack</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot"></span><div><strong>Python at the API-call level</strong> — not data science level. Enough to call an API, parse JSON, loop over results, and ship a script. This is the baseline gate for almost every role.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Calling the Claude or OpenAI API</strong> — handling responses, building a basic multi-turn chat loop, understanding tokens, context windows, and temperature.</div></li>
+      <li><span class="skill-dot"></span><div><strong>Vector databases</strong> — start with ChromaDB (free, runs locally). Then learn Pinecone or pgvector. Chunking and embedding documents is the core RAG engineering skill.</div></li>
+      <li><span class="skill-dot"></span><div><strong>One evaluation framework</strong> — Promptfoo or RAGAS are the best starting points. This is the skill that separates "I built a demo" from "I built something production-ready."</div></li>
+      <li><span class="skill-dot"></span><div><strong>LangChain or LlamaIndex</strong> — orchestration layers. Learn what they abstract away <em>after</em> you've built a RAG pipeline from scratch once, so you understand what's happening underneath.</div></li>
+    </ul>
+
+    <h3>The portfolio project</h3>
+    <div class="callout callout-orange">
+      <strong>Build this one thing</strong>
+      <p>Take 20–50 Cisco HR policy PDFs, chunk them, embed them, build a Q&amp;A bot over them with citations, and deploy it somewhere accessible. That single project demonstrates prompt engineering, RAG architecture, and implicit governance thinking all at once — and it's domain-specific to your actual work context, which is exactly what hiring managers are looking for.</p>
+    </div>
+
+    <h3>For the governance track specifically</h3>
+    <ul class="skill-list">
+      <li><span class="skill-dot blue"></span><div><strong>Statistical bias metrics</strong> — selection rate ratios, disparate impact analysis, false positive rates by subgroup. These are the numbers an audit produces.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Explainability tools</strong> — SHAP and LIME are the standard libraries for explaining why a model made a particular decision.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Regulatory literacy</strong> — read the EEOC's 2023 AI guidance, NYC LL144 full text, and the EU AI Act's high-risk system definitions. You don't need a law degree; you need to know what compliance looks like.</div></li>
+      <li><span class="skill-dot blue"></span><div><strong>Audit documentation</strong> — understand what an AI bias audit report contains and how to produce one. The NIST AI RMF (Risk Management Framework) is the standard reference.</div></li>
+    </ul>
+
+    <h3>Learning path (roughly 12–16 weeks)</h3>
+    <table class="compare-table">
+      <thead>
+        <tr><th>Weeks</th><th>Focus</th><th>Output</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1–2</td>
+          <td>Python basics + LLM API fundamentals</td>
+          <td>Working chat script that calls Claude or OpenAI</td>
+        </tr>
+        <tr>
+          <td>3–4</td>
+          <td>Embeddings, vector databases, RAG from scratch</td>
+          <td>Q&amp;A system over a folder of HR PDFs with citations</td>
+        </tr>
+        <tr>
+          <td>5–6</td>
+          <td>Evaluation frameworks — RAGAS or Promptfoo</td>
+          <td>Test suite with accuracy metrics for your RAG bot</td>
+        </tr>
+        <tr>
+          <td>7–8</td>
+          <td>LangChain / LlamaIndex orchestration</td>
+          <td>Refactored RAG pipeline with cleaner architecture</td>
+        </tr>
+        <tr>
+          <td>9–10</td>
+          <td>Bias metrics and audit methodology</td>
+          <td>Bias audit report on a sample AI HR decision system</td>
+        </tr>
+        <tr>
+          <td>11–16</td>
+          <td>Polish portfolio, deploy, document</td>
+          <td>Shareable project with write-up, deployed endpoint</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── SECTION 7: RESOURCES ── -->
+  <section id="resources">
+    <div class="section-marker">
+      <span class="section-num">07</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>Further reading &amp; resources</h2>
+    <p class="section-tagline">Vetted sources — all free unless noted.</p>
+
+    <h3>Prompt engineering</h3>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank" rel="noopener">
+        <div class="rc-tag">Anthropic · Free</div>
+        <div class="rc-title">Prompt Engineering Overview</div>
+        <div class="rc-desc">Anthropic's official guide. Start here. Covers system prompts, few-shot, chain-of-thought, and more with Claude-specific examples.</div>
+      </a>
+      <a class="resource-card" href="https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/" target="_blank" rel="noopener">
+        <div class="rc-tag">DeepLearning.AI · Free</div>
+        <div class="rc-title">Prompt Engineering for Developers</div>
+        <div class="rc-desc">Andrew Ng's short course. 1–2 hours. Practical, code-first, covers all the core patterns with real examples.</div>
+      </a>
+      <a class="resource-card" href="https://github.com/anthropics/anthropic-cookbook" target="_blank" rel="noopener">
+        <div class="rc-tag">GitHub · Free</div>
+        <div class="rc-title">Anthropic Cookbook</div>
+        <div class="rc-desc">Dozens of working code examples for Claude — RAG, agents, structured output, tool use. Best reference for implementation.</div>
+      </a>
+      <a class="resource-card" href="https://www.promptfoo.dev/docs/intro" target="_blank" rel="noopener">
+        <div class="rc-tag">Promptfoo · Free</div>
+        <div class="rc-title">Promptfoo Documentation</div>
+        <div class="rc-desc">The cleanest intro to prompt evaluation. Learn how to test whether your prompts actually work across a range of inputs.</div>
+      </a>
+    </div>
+
+    <h3>RAG and vector databases</h3>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/" target="_blank" rel="noopener">
+        <div class="rc-tag">DeepLearning.AI · Free</div>
+        <div class="rc-title">Building Systems with LLMs</div>
+        <div class="rc-desc">Covers multi-step LLM pipelines and RAG fundamentals. Practical code throughout. Follow with the RAG-specific course below.</div>
+      </a>
+      <a class="resource-card" href="https://docs.trychroma.com/getting-started" target="_blank" rel="noopener">
+        <div class="rc-tag">ChromaDB · Free</div>
+        <div class="rc-title">ChromaDB Getting Started</div>
+        <div class="rc-desc">The easiest vector database to run locally. Build your first RAG pipeline here before moving to hosted options like Pinecone.</div>
+      </a>
+      <a class="resource-card" href="https://docs.llamaindex.ai/en/stable/" target="_blank" rel="noopener">
+        <div class="rc-tag">LlamaIndex · Free</div>
+        <div class="rc-title">LlamaIndex Documentation</div>
+        <div class="rc-desc">Purpose-built for RAG. Better starting point than LangChain for document Q&amp;A specifically. Clear docs with many examples.</div>
+      </a>
+      <a class="resource-card" href="https://docs.ragas.io/en/latest/" target="_blank" rel="noopener">
+        <div class="rc-tag">RAGAS · Free</div>
+        <div class="rc-title">RAGAS — RAG Evaluation</div>
+        <div class="rc-desc">Framework specifically for evaluating RAG pipelines. Measures faithfulness, answer relevance, and context recall. Essential for production work.</div>
+      </a>
+    </div>
+
+    <h3>AI bias and governance</h3>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.eeoc.gov/laws/guidance/questions-and-answers-clarify-and-provide-common-interpretation-uniform-guidelines" target="_blank" rel="noopener">
+        <div class="rc-tag">EEOC · Free</div>
+        <div class="rc-title">EEOC AI &amp; Automated Systems Guidance</div>
+        <div class="rc-desc">The EEOC's official guidance on AI in employment decisions. Required reading for anyone working on HR AI in the US.</div>
+      </a>
+      <a class="resource-card" href="https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page" target="_blank" rel="noopener">
+        <div class="rc-tag">NYC Gov · Free</div>
+        <div class="rc-title">NYC Local Law 144 — Full Text</div>
+        <div class="rc-desc">The first US law mandating annual bias audits for automated hiring tools. The model for what's coming federally. Read the full requirements.</div>
+      </a>
+      <a class="resource-card" href="https://airc.nist.gov/RMF" target="_blank" rel="noopener">
+        <div class="rc-tag">NIST · Free</div>
+        <div class="rc-title">NIST AI Risk Management Framework</div>
+        <div class="rc-desc">The US government's standard for AI risk management. If you work on AI governance, this is the reference document organizations use.</div>
+      </a>
+      <a class="resource-card" href="https://pair.withgoogle.com/guidebook/" target="_blank" rel="noopener">
+        <div class="rc-tag">Google PAIR · Free</div>
+        <div class="rc-title">People + AI Guidebook</div>
+        <div class="rc-desc">Practical guide to designing responsible AI systems. Less regulatory, more design-focused. Good for understanding human-in-the-loop design.</div>
+      </a>
+    </div>
+
+    <h3>Career and technical depth</h3>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://aishippinglabs.com/blog/what-is-an-ai-engineer-based-on-job-descriptions" target="_blank" rel="noopener">
+        <div class="rc-tag">AI Shipping Labs · Free</div>
+        <div class="rc-title">What Is an AI Engineer in 2026?</div>
+        <div class="rc-desc">Analysis of 1,000+ actual AI engineer job descriptions. The most grounded data on what employers actually want right now.</div>
+      </a>
+      <a class="resource-card" href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener">
+        <div class="rc-tag">Lilian Weng · Free</div>
+        <div class="rc-title">LLM-Powered Autonomous Agents</div>
+        <div class="rc-desc">One of the best technical deep-dives on how agents work. Dense but worth reading slowly. Bookmark and return to as your knowledge grows.</div>
+      </a>
+      <a class="resource-card" href="https://huggingface.co/learn/nlp-course/chapter1/1" target="_blank" rel="noopener">
+        <div class="rc-tag">Hugging Face · Free</div>
+        <div class="rc-title">NLP Course</div>
+        <div class="rc-desc">Deeper background on how language models actually work. Not required for applied AI roles but provides the mental model that makes everything else click.</div>
+      </a>
+      <a class="resource-card" href="https://www.secondtalent.com/resources/most-in-demand-ai-engineering-skills-and-salary-ranges/" target="_blank" rel="noopener">
+        <div class="rc-tag">Second Talent · Free</div>
+        <div class="rc-title">Top AI Engineering Skills &amp; Salary Ranges 2026</div>
+        <div class="rc-desc">Current salary data and skill demand analysis. Useful for benchmarking and understanding which specializations command the highest premiums.</div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <strong>AI in HR: A Field Guide</strong> &nbsp;·&nbsp; Compiled May 2026 &nbsp;·&nbsp; Based on a learning session covering prompt engineering, RAG, AI bias, and career paths in applied AI
+</footer>
+
+</body>
+</html>
