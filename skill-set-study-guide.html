@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Interview Study Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: #f5f4f0;
+    color: #1a1a18;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #1a1a18;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #5f5e5a;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #5f5e5a;
+  }
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+  .dot-high { background: #f7c1c1; border: 1.5px solid #a32d2d; }
+  .dot-med  { background: #fac775; border: 1.5px solid #854f0b; }
+  .dot-res  { background: #c0dd97; border: 1.5px solid #3b6d11; }
+
+  /* Nav tabs */
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .nav-btn {
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #b4b2a9;
+    background: #ffffff;
+    color: #5f5e5a;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .nav-btn:hover:not(.active) { background: #f1efe8; }
+  .nav-btn.active {
+    background: #e6f1fb;
+    color: #185fa5;
+    border-color: transparent;
+    font-weight: 500;
+  }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Topic cards */
+  .topic {
+    border: 1px solid #d3d1c7;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .topic-header {
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    user-select: none;
+  }
+  .topic-header:hover { background: #f1efe8; }
+  .topic-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topic-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a18;
+  }
+  .topic-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag-high { background: #fcebeb; color: #a32d2d; }
+  .tag-med  { background: #faeeda; color: #854f0b; }
+  .tag-res  { background: #eaf3de; color: #3b6d11; }
+
+  .chevron {
+    font-size: 18px;
+    color: #888780;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  .topic-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid #d3d1c7;
+  }
+  .topic-body.open { display: block; }
+
+  /* Boxes */
+  .def-box {
+    background: #f1efe8;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 12px 0;
+  }
+  .box-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .def-box .box-label { color: #888780; }
+  .box-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #444441;
+  }
+
+  .answer-box {
+    background: #eaf3de;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+  }
+  .answer-box .box-label { color: #3b6d11; }
+
+  .warn-box {
+    background: #faeeda;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+  }
+  .warn-box .box-label { color: #854f0b; }
+
+  .danger-box {
+    background: #fcebeb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+  }
+  .danger-box .box-label { color: #a32d2d; }
+
+  /* Typography inside bodies */
+  .sub {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a18;
+    margin: 14px 0 6px;
+  }
+  p, li {
+    font-size: 14px;
+    color: #5f5e5a;
+    line-height: 1.65;
+  }
+  ul {
+    padding-left: 18px;
+    margin: 6px 0;
+  }
+  li { margin-bottom: 5px; }
+  strong { color: #1a1a18; font-weight: 500; }
+  code {
+    background: #f1efe8;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: #3c3489;
+  }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .chip {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f1efe8;
+    color: #5f5e5a;
+    border: 1px solid #d3d1c7;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Cisco Interview Study Guide</h1>
+  <p class="subtitle">Full Stack SWE 2 · HR IT Team · Panel with Senior AI Engineer + Technical Product Owner</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-high"></div> Very likely to come up</div>
+    <div class="legend-item"><div class="legend-dot dot-med"></div> Likely to come up</div>
+    <div class="legend-item"><div class="legend-dot dot-res"></div> Directly on your resume</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('fullstack', this)">Full-Stack Dev</button>
+    <button class="nav-btn" onclick="showSection('ai', this)">AI &amp; GenAI</button>
+    <button class="nav-btn" onclick="showSection('system', this)">System Design</button>
+    <button class="nav-btn" onclick="showSection('security', this)">Security</button>
+    <button class="nav-btn" onclick="showSection('product', this)">Product Thinking</button>
+    <button class="nav-btn" onclick="showSection('resume', this)">Your Resume Highlights</button>
+  </div>
+
+  <!-- ═══════════════════════ FULL STACK ═══════════════════════ -->
+  <div class="section active" id="fullstack">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">REST APIs</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">REST API is a way for two applications to talk to each other over the internet using standard web requests. Think of it like a menu at a restaurant: the API defines what you can ask for (GET, POST, PUT, DELETE), and the server brings back what you ordered in a structured format (usually JSON). REST stands for Representational State Transfer.</div>
+        </div>
+        <div class="sub">Key concepts to know</div>
+        <ul>
+          <li><strong>HTTP verbs:</strong> GET = read data, POST = create something new, PUT/PATCH = update, DELETE = remove</li>
+          <li><strong>Stateless:</strong> Each request is completely independent. The server doesn't "remember" you from the last request. Any session info must come with the request itself (like a JWT token).</li>
+          <li><strong>Status codes:</strong> 200 = success, 201 = created, 400 = bad request (your fault), 401 = not authenticated, 403 = no permission, 404 = not found, 500 = server error</li>
+          <li><strong>JSON:</strong> The standard data format sent back and forth. Looks like: <code>{"name": "Vicki", "role": "engineer"}</code></li>
+          <li><strong>Endpoints:</strong> The specific URL paths your API exposes, like <code>/api/users</code> or <code>/api/events/123</code></li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention (PaceCircle project)</div>
+          <div class="box-text">I built a production-grade REST API for PaceCircle, a social fitness platform. I designed endpoints for circle management, workout event scheduling, and role-based ownership. I used Spring Boot and followed REST conventions throughout: GET for retrieving data, POST for creating circles and events, PUT for updates, and DELETE for removals. I also implemented a global exception handler using @RestControllerAdvice so error responses were consistent and meaningful across all endpoints.</div>
+        </div>
+        <div class="warn-box">
+          <div class="box-label">If they go deeper</div>
+          <div class="box-text">They may ask the difference between REST and GraphQL. REST has fixed endpoints per resource; GraphQL lets the client ask for exactly the fields it needs in one request. The Cisco team uses REST, so you won't need to defend GraphQL, but knowing the tradeoff is a plus.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Role-Based Access Control (RBAC)</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">RBAC is a security system where what you're allowed to do in an application is determined by your role, not your individual identity. For example: an "admin" can delete records, a "manager" can edit them, and an "employee" can only view their own. It's how you prevent someone from accessing data or actions they shouldn't touch.</div>
+        </div>
+        <div class="sub">Key concepts</div>
+        <ul>
+          <li><strong>Roles:</strong> Labeled permission groups (admin, manager, viewer, owner)</li>
+          <li><strong>Permissions:</strong> The actual actions allowed per role (read, write, delete)</li>
+          <li><strong>Enforcement points:</strong> You check roles at the API layer (backend), not just the UI. A bad actor can bypass buttons in the frontend and call your API directly.</li>
+          <li><strong>Cisco's real use case:</strong> Their Senior AI Engineer built "an app for processing employee data with role-based access, enabling managers and admins to alter employment history and employees to make elections." This is textbook RBAC.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention (two angles)</div>
+          <div class="box-text">From PaceCircle: I implemented role-based ownership enforcement in the backend where circle owners have different permissions than regular members. From Bank of America: I performed access reviews and database maintenance on 120+ development and production datasets, ensuring 160+ developers only had access to the data their role required. Both taught me that access control needs to live at the data layer, not just the UI.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Full-stack migration and modernization</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">Legacy systems are old applications that still work but are hard to maintain, scale, or update. Modernization means rebuilding or migrating them to newer architectures. The Cisco team does this (the Senior AI Engineer built a Go bot framework to replace existing web apps), and so do you at BofA.</div>
+        </div>
+        <div class="sub">Key terms</div>
+        <ul>
+          <li><strong>OpenShift:</strong> A platform from Red Hat that runs applications in containers. Think of it as a managed environment that makes deploying, scaling, and updating apps easier and more reliable than old-school servers.</li>
+          <li><strong>Legacy system:</strong> Old software that works but is expensive to change, often because it uses outdated tech or has no documentation.</li>
+          <li><strong>Migration:</strong> Moving data, code, or infrastructure from one system to another without breaking things.</li>
+          <li><strong>Autosys / batch jobs:</strong> Autosys is a job scheduler. Batch jobs are automated tasks that run on a schedule (like nightly data processing). JIL = Job Information Language, the scripting language Autosys uses.</li>
+          <li><strong>DIT / SIT / UAT / LT:</strong> Testing environments before production. Development Integration Testing, System Integration Testing, User Acceptance Testing, Load Testing.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention (BofA)</div>
+          <div class="box-text">At BofA I'm leading a full-stack migration from legacy web servers to OpenShift, rebuilding the frontend in Angular and the backend in Spring Boot with new REST APIs. On a separate track I handled database modernization, extracting and updating legacy Autosys batch job scripts across multiple environments (DIT, SIT, UAT, LT, and production) on a regular 2-month deployment cycle. Both projects taught me how to modernize carefully without disrupting systems that real users depend on every day.</div>
+        </div>
+        <div class="warn-box">
+          <div class="box-label">Good follow-up they might ask</div>
+          <div class="box-text">"What's the biggest risk in a migration like that?" — Your answer: regression, meaning something that worked before breaks during the migration. You mitigate it through environment testing before touching production.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Angular and Spring Boot</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What they are</div>
+          <div class="box-text">Angular is a frontend framework by Google for building web UIs using TypeScript. Spring Boot is a Java framework for building backend applications and APIs — receiving requests, processing logic, talking to databases, and sending responses. Together they're a very common full-stack pairing, which is exactly what Cisco uses.</div>
+        </div>
+        <div class="sub">Key Spring Boot concepts</div>
+        <ul>
+          <li><strong>@RestController:</strong> Marks a class as an API controller that handles HTTP requests</li>
+          <li><strong>@Service:</strong> Business logic layer, sits between controller and database</li>
+          <li><strong>@Repository:</strong> Database access layer</li>
+          <li><strong>Spring Security:</strong> The module that handles authentication and authorization (you used this in PaceCircle)</li>
+          <li><strong>Dependency injection:</strong> Spring manages object creation for you. You declare what you need and Spring wires it up. This makes code easier to test.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I use Spring Boot daily at BofA, building new REST APIs as part of our migration to OpenShift. In PaceCircle I went deeper into the framework, implementing Spring Security with JWT authentication, a STATELESS session policy (meaning the server never stores session data — every request is self-contained), and a custom exception hierarchy with a global @RestControllerAdvice handler for consistent error responses. I also used Flyway to manage database schema versions through migration scripts.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">JWT authentication</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">JWT stands for JSON Web Token. It's a compact, self-contained way to verify who you are when making API requests. After you log in, the server gives you a signed token. You attach this token to every future request, and the server verifies the signature to confirm it's legitimate without needing to look you up in a database each time. It has three parts: a header (algorithm used), a payload (your user data/claims), and a signature (proves it hasn't been tampered with).</div>
+        </div>
+        <div class="sub">Why it matters to this team</div>
+        <p>The Cisco team builds HR tools used by 40,000+ employees. Authentication is critical. Their apps need to know who you are and what your role is before letting you touch employment data.</p>
+        <div class="answer-box">
+          <div class="box-label">What to mention (PaceCircle)</div>
+          <div class="box-text">In PaceCircle I implemented JWT authentication with a STATELESS session policy. That means the server never stores session data at all. Every request the client makes must include the JWT in the Authorization header. The server validates the signature and reads the claims (like user ID and role) directly from the token. This approach scales well because any server instance can validate any request without needing shared session storage.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Testing: unit tests and integration tests</span>
+          <span class="topic-tag tag-med">Likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">The difference</div>
+          <div class="box-text">A unit test checks one small piece of code in isolation (like a single method) with no real database or network. An integration test checks that multiple pieces work correctly together, like your API endpoint + your service layer + your database. Unit tests are fast and pinpoint where a bug is. Integration tests are slower but confirm the whole chain works.</div>
+        </div>
+        <ul>
+          <li><strong>Mockito:</strong> A Java library for unit testing. It lets you "mock" (fake) dependencies so you can test one piece in isolation, e.g. fake the database layer so you're only testing your service logic.</li>
+          <li><strong>MockMvc:</strong> A Spring testing tool that simulates HTTP requests to your controllers without starting a real server. Used for integration-style tests of your API layer.</li>
+          <li><strong>Flyway:</strong> A database migration tool. It manages versioned SQL scripts so your database schema is always in sync with your code. Like version control for your database structure.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">In PaceCircle I'm writing Mockito unit tests for my service layer, mocking out repository dependencies so each test is isolated and fast. I'm also writing MockMvc integration tests to test the full request/response cycle for my API endpoints. I set up Flyway with 6 migration scripts to manage my PostgreSQL schema versions, so database structure changes are tracked and reproducible in any environment.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ AI ═══════════════════════ -->
+  <div class="section" id="ai">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">RAG (Retrieval-Augmented Generation)</span>
+          <span class="topic-tag tag-high">Very likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is (plain English)</div>
+          <div class="box-text">AI models are trained on public internet data up to a certain date. They don't know anything about your company's internal documents or database. RAG solves this. Before asking the AI a question, you first search your own documents or database for relevant information, then include that information in the prompt you send the AI. The AI uses both its general knowledge AND your specific retrieved data to give a better, more accurate answer. Think of it as giving the AI a cheat sheet pulled from your own files.</div>
+        </div>
+        <div class="sub">How it works step by step</div>
+        <ul>
+          <li>User asks a question</li>
+          <li>System searches a knowledge base (database, documents, emails) for relevant chunks</li>
+          <li>Those chunks are inserted into the prompt alongside the question</li>
+          <li>The AI generates an answer using both the retrieved content and its own training</li>
+        </ul>
+        <div class="sub">Why this team cares deeply</div>
+        <p>The Senior AI Engineer built "an AI application to auto-populate requests in an IT system from employee and external emails via RAG." Pulling context from emails, then having the AI understand and act on them, is exactly what RAG is for.</p>
+        <div class="answer-box">
+          <div class="box-label">What to mention (Android Story Generator)</div>
+          <div class="box-text">My Android Story Generator app used a similar pattern. I integrated the Google Cloud Vision API to extract structured data from images (automated tagging), then passed those tags as context to the TextCortex API for story generation. I was essentially augmenting the generation step with retrieved/extracted information. I'd love to apply this to a proper RAG system, which is something I've been studying since it's central to building useful enterprise AI tools.</div>
+        </div>
+        <div class="warn-box">
+          <div class="box-label">Key term: vector database</div>
+          <div class="box-text">They may mention this. A vector database stores documents as numerical representations (embeddings) that capture meaning rather than exact words. When you search it, you find semantically similar content, not just keyword matches. Examples: Pinecone, Weaviate, pgvector (a PostgreSQL extension). You don't need deep experience, just awareness of what they are and why they're used in RAG.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">AI agents and tool-based approach</span>
+          <span class="topic-tag tag-high">Very likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">A regular AI just answers a question. An AI agent can take actions. You give it a set of tools (functions it can call, like "search the HR database" or "send a Slack message" or "update a ticket"), and the AI decides which tools to use and in what order to complete a goal. The agent reasons through a multi-step plan, calls tools, observes results, and keeps going until the task is done. This is what makes it an "agent" instead of a simple chatbot.</div>
+        </div>
+        <div class="sub">Why this is the core of what they build</div>
+        <p>The Senior AI Engineer's main project is "a proprietary gen AI processing framework which uses agents and a tool-based approach to complete user requests." The manager leads "the P&amp;C Assistant AI Agent" and "a framework to easily create other AI agents." This is literally the center of their work.</p>
+        <div class="sub">Key terms</div>
+        <ul>
+          <li><strong>Tool/function calling:</strong> The ability to tell an LLM "here are functions you can call, with their names and parameters." The LLM decides when to call them and with what arguments.</li>
+          <li><strong>Orchestration:</strong> The layer of code that runs the loop: call LLM → parse tool call → execute tool → pass result back to LLM → repeat until done.</li>
+          <li><strong>P&amp;C Assistant:</strong> People &amp; Culture (HR) assistant. An AI agent that helps employees with HR-related questions and tasks.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I placed as a finalist in BofA's Agile Innovation Challenge for an AI integration project in documentation (2024) and a prompt engineering project (2025). Through that work I got hands-on with prompting patterns and started exploring agentic design. I understand the concept of giving an LLM a set of tools and having it reason about which to call. I'm excited about this team's work because building the framework for agents, not just individual agents, is a much harder and more interesting engineering problem.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">LLMs and prompt engineering</span>
+          <span class="topic-tag tag-high">Very likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What LLMs are</div>
+          <div class="box-text">Large Language Models (LLMs) are the AI models that generate text: GPT, Gemini, Llama, etc. They were trained on enormous amounts of text and learned statistical patterns of language. They predict the most likely next word given what came before. They don't "understand" in a human sense but they're remarkably capable at language tasks.</div>
+        </div>
+        <div class="sub">Their specific LLMs</div>
+        <div class="chip-row">
+          <span class="chip">Meta Llama (open source, can self-host)</span>
+          <span class="chip">Google Gemini (commercial)</span>
+          <span class="chip">VertexAI (Google's cloud AI platform)</span>
+        </div>
+        <div class="sub">Prompt engineering basics</div>
+        <ul>
+          <li><strong>System prompt:</strong> Instructions given to the model at the start that define its persona, rules, and context. Users don't usually see this.</li>
+          <li><strong>Few-shot prompting:</strong> Giving the model examples of what you want before asking it to do the task.</li>
+          <li><strong>Temperature:</strong> Controls randomness. Low (near 0) = more predictable and factual. High (near 1) = more creative. HR tools usually want low temperature.</li>
+          <li><strong>Context window:</strong> The maximum amount of text an LLM can "see" at once. Everything has to fit: instructions, retrieved documents, conversation history, and the user's question.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I was a two-time finalist in BofA's Agile Innovation Challenge, focusing on AI integration in documentation in 2024 and prompt engineering in 2025. The prompt engineering project taught me how significantly the structure and wording of a prompt affects model output, and how to design prompts that produce consistent, structured results for use in automated pipelines. That work gave me real appreciation for why enterprises need systematic prompt design rather than ad-hoc queries.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Microservices and AI integration</span>
+          <span class="topic-tag tag-med">Likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What microservices are</div>
+          <div class="box-text">Instead of one big application that does everything (a monolith), a microservice architecture breaks functionality into small, independent services that each do one thing. Each service has its own codebase, can be deployed independently, and communicates with others via APIs. For AI, this often means one microservice handles inference (talking to the LLM) and another handles authentication, another handles data, etc.</div>
+        </div>
+        <div class="sub">Why this matters for the team</div>
+        <p>The Senior AI Engineer "constructed an AI integrated microservice framework with wizardllm2 and pytorch." They built AI capabilities as a microservice that plugs into larger systems.</p>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">My BofA migration involves moving to OpenShift, which is a container orchestration platform designed for microservice architectures. I understand how services communicate through APIs and how to design a service with a clear, bounded responsibility. For AI specifically, I can see why keeping inference as its own service makes sense: it lets you swap out the underlying LLM without changing the rest of your application.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ SYSTEM DESIGN ═══════════════════════ -->
+  <div class="section" id="system">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Database design and PostgreSQL</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">Key concepts</div>
+          <div class="box-text">A relational database (like PostgreSQL) stores data in tables with rows and columns, like spreadsheets that can reference each other. SQL is the language used to query them. PostgreSQL is an open-source relational database and one of the most popular choices for production applications.</div>
+        </div>
+        <ul>
+          <li><strong>Schema:</strong> The structure/blueprint of your database: what tables exist, what columns, what data types, what constraints.</li>
+          <li><strong>Foreign key:</strong> A column that references the primary key of another table, creating a relationship between them.</li>
+          <li><strong>Indexing:</strong> Speeds up queries on specific columns. Without an index, a query scans every row. With one, it jumps directly to matching rows.</li>
+          <li><strong>Flyway migration scripts:</strong> Numbered SQL files that Flyway runs in order to build or update your schema. Any developer can recreate the exact same database state from scratch.</li>
+          <li><strong>Joins:</strong> Combining data from two or more tables. INNER JOIN = only rows that match in both. LEFT JOIN = all rows from the left plus matching rows from the right.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">In PaceCircle I designed the PostgreSQL schema for a social fitness platform, including tables for users, circles, memberships, and workout events. I managed the schema through 6 Flyway migration scripts, so database structure was version-controlled and reproducible. At BofA I've done access maintenance on 120+ datasets, which gave me a solid understanding of how data is structured and governed at enterprise scale.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Docker and containers</span>
+          <span class="topic-tag tag-med">Likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">Docker packages an application and everything it needs to run (code, runtime, libraries, config) into a container — a standardized unit that runs the same way anywhere. The classic developer problem is "it works on my machine." Docker solves that: if it runs in the container on your laptop, it runs the same way in production. OpenShift (what BofA uses) runs Docker containers at scale.</div>
+        </div>
+        <ul>
+          <li><strong>Image:</strong> The blueprint for a container, like a class in OOP</li>
+          <li><strong>Container:</strong> A running instance of an image, like an object</li>
+          <li><strong>Dockerfile:</strong> A script that defines how to build the image (what OS, what dependencies, what code to copy in, what command to run)</li>
+          <li><strong>Registry:</strong> A place to store and share images (like Docker Hub, or internal registries at enterprise companies)</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I use Docker in my projects and in my BofA migration work targeting OpenShift. Containerization removes the environment inconsistency problem and makes deployments predictable. In the context of microservices, each service runs in its own container, so they're independently deployable and scalable.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Caching and performance</span>
+          <span class="topic-tag tag-med">Likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What caching is</div>
+          <div class="box-text">Caching stores a copy of frequently requested data in fast-access memory so you don't have to recompute or re-fetch it from a slow source every time. Imagine asking a librarian for the same book 100 times. Instead of going to the shelf each time, they keep it on their desk. That's caching. The Cisco team's Senior AI Engineer specifically mentioned "improving user data access and response times through effective caching."</div>
+        </div>
+        <ul>
+          <li><strong>Cache hit:</strong> The data is already in cache, return it immediately</li>
+          <li><strong>Cache miss:</strong> Data isn't in cache, fetch from source and store it</li>
+          <li><strong>Cache invalidation:</strong> When the underlying data changes, you need to update or clear the cached version so you're not serving stale data. This is the hard part.</li>
+          <li><strong>Redis:</strong> The most common caching tool. An in-memory key-value store. Extremely fast.</li>
+          <li><strong>TTL (Time to Live):</strong> How long a cached item stays before it's automatically removed/refreshed</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I haven't implemented Redis caching yet, but I understand the tradeoffs clearly: you gain speed at the cost of potentially serving stale data. The right TTL and invalidation strategy depends on how frequently the underlying data changes. For an HR system, employee data changes infrequently enough that caching profile information makes sense, but real-time things like availability should always hit the source.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Apache Kafka (event-driven systems)</span>
+          <span class="topic-tag tag-med">Likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What it is</div>
+          <div class="box-text">Kafka is a messaging system. Instead of Service A calling Service B directly (tight coupling), Service A publishes an "event" to a Kafka topic (like posting to a channel), and any services that care subscribe and process it independently. This decouples your services. If Service B is down, the event waits in Kafka until B is back. Think of Kafka as a very fast, very durable message queue or event log.</div>
+        </div>
+        <ul>
+          <li><strong>Topic:</strong> A named channel for a category of events (e.g. "employee-created", "survey-submitted")</li>
+          <li><strong>Producer:</strong> The service that publishes events</li>
+          <li><strong>Consumer:</strong> The service(s) that subscribe and react to events</li>
+          <li><strong>Why HR systems use it:</strong> When an employee submits a form, you might need to update 4 different systems. Kafka lets you do that asynchronously without them all needing to be available at the same instant.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention if asked</div>
+          <div class="box-text">I haven't used Kafka in production yet, but I understand the problem it solves. In a synchronous system, if one downstream service is slow or down, the whole chain stalls. Kafka decouples that by letting services communicate through durable, ordered event logs. For an HR system processing thousands of employee events, that reliability and scalability matters a lot. It's something I'm actively learning.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ SECURITY ═══════════════════════ -->
+  <div class="section" id="security">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Application security fundamentals</span>
+          <span class="topic-tag tag-high">Very likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">Why this team cares</div>
+          <div class="box-text">The Cisco team does "vulnerability scans and patches on applications used by 40,000+ users." That's a huge attack surface. HR data is especially sensitive (salaries, health info, personal details). Security is not optional for them.</div>
+        </div>
+        <div class="sub">Core vulnerabilities to know (OWASP Top 10)</div>
+        <ul>
+          <li><strong>SQL injection:</strong> An attacker puts SQL code into a form field to manipulate your database. Prevention: use parameterized queries or prepared statements, never build SQL strings by concatenating user input.</li>
+          <li><strong>XSS (Cross-Site Scripting):</strong> Injecting malicious JavaScript into a webpage that other users see. Prevention: escape/sanitize output, use Content Security Policy headers.</li>
+          <li><strong>Broken access control:</strong> Users can access things they shouldn't. Prevention: enforce authorization at the backend on every request, not just the frontend.</li>
+          <li><strong>Sensitive data exposure:</strong> Storing or transmitting sensitive data without encryption. Prevention: HTTPS everywhere, hash passwords (bcrypt), never log sensitive fields.</li>
+          <li><strong>Vulnerability scan:</strong> An automated tool that checks your application or infrastructure for known security weaknesses.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention (two angles)</div>
+          <div class="box-text">At BofA I performed access reviews ensuring confidential information was properly restricted for 160+ developers across 120+ datasets. That's directly about broken access control at scale. In PaceCircle I implemented JWT with a STATELESS session policy and a custom exception hierarchy. And in my Private Messaging project I went deep on cryptography, implementing the Double Ratchet algorithm with HKDF, AES-GCM, and curve P-256 to match the security standards used by Signal and WhatsApp.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Cryptography (your Private Messaging project)</span>
+          <span class="topic-tag tag-med">Likely</span>
+          <span class="topic-tag tag-res">On your resume</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">Key terms defined simply</div>
+          <div class="box-text">This project is unusually impressive for a SWE 2 and worth being able to explain clearly without getting lost in jargon.</div>
+        </div>
+        <ul>
+          <li><strong>End-to-end encryption (E2EE):</strong> Only the sender and recipient can read the message. Even the server can't. The keys never leave users' devices.</li>
+          <li><strong>Double Ratchet algorithm:</strong> The protocol Signal and WhatsApp use. It generates a new encryption key for every single message. Even if one key is compromised, past and future messages stay safe. ("Forward secrecy" + "break-in recovery.")</li>
+          <li><strong>AES-GCM:</strong> A symmetric encryption algorithm. AES is the cipher (industry standard, very strong). GCM mode also provides authentication, meaning you can detect if the message was tampered with.</li>
+          <li><strong>HKDF with SHA256:</strong> A key derivation function. Takes input key material and derives strong cryptographic keys from it in a secure, standardized way.</li>
+          <li><strong>CCA-secure El-Gamal:</strong> CCA = Chosen Ciphertext Attack resistance. El-Gamal is a public-key encryption scheme. CCA-secure means it can't be broken even if the attacker can ask the system to decrypt chosen ciphertexts.</li>
+          <li><strong>Your unique feature:</strong> Message reporting with CCA-secure encryption. You can report a message to a moderator without the moderator being able to read it unless they decide to act. Privacy-preserving moderation.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">I built an end-to-end encrypted chat client implementing the Double Ratchet algorithm — the same protocol Signal and WhatsApp use. Every message uses a freshly derived key, providing forward secrecy. The most interesting design challenge was building a message reporting feature: users can flag content for moderation, but the moderator can't see the content unless they actively decrypt it. I used CCA-secure El-Gamal encryption to enable this, so privacy is preserved by default even in the reporting flow. This project taught me how to reason about threat models, not just use crypto libraries as black boxes.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ PRODUCT THINKING ═══════════════════════ -->
+  <div class="section" id="product">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Agile and working with stakeholders</span>
+          <span class="topic-tag tag-high">Very likely (TPO will ask this)</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">What the TPO cares about</div>
+          <div class="box-text">A Technical Product Owner bridges engineering and business. They want to know you can translate technical realities into business language, work in iterative cycles, and handle stakeholder needs without compromising technical quality. After 14 years at Cisco in this role, they've seen engineers who can only code and engineers who can also collaborate. They want the latter.</div>
+        </div>
+        <ul>
+          <li><strong>Agile:</strong> A development methodology where you work in short cycles (sprints, usually 2 weeks), ship incrementally, and adjust based on feedback.</li>
+          <li><strong>Sprint:</strong> A short, time-boxed work period where the team commits to completing a defined set of tasks.</li>
+          <li><strong>Stakeholder:</strong> Anyone with an interest in what you're building: a product owner, a business unit, or end users.</li>
+          <li><strong>MVP (Minimum Viable Product):</strong> The smallest version of a feature that delivers real value and can be tested with users.</li>
+        </ul>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">At BofA I work in an Agile environment. I was also a two-time Agile Innovation Challenge finalist, which required scoping an AI solution, making a business case, and presenting it to leadership — not just technical reviewers. Working with Wake Smiles, I maintained a volunteer management system for a non-profit, which meant balancing technical decisions with the real needs of non-technical users. I've learned that the best technical solution is the one that actually gets used, which means understanding who you're building for.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Building for non-technical users (HR context)</span>
+          <span class="topic-tag tag-high">Very likely</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">Why this is a big deal for this team</div>
+          <div class="box-text">Everything the Cisco HR IT team builds is used by HR professionals and regular employees, not engineers. An AI agent that confuses users is worse than no agent at all. The Senior AI Engineer mentions "user interaction in natural work environments" repeatedly, meaning the tools have to fit into how employees already work (Slack, email, etc.) rather than forcing them into a new system.</div>
+        </div>
+        <div class="answer-box">
+          <div class="box-label">What to mention</div>
+          <div class="box-text">When I built the Wake Smiles volunteer management system, the users were dental clinic volunteers and staff — not developers. I focused on mobile-first design and real-time updates because that's how they actually used it. My Android Story Generator was similarly designed to reduce user interaction time through intuitive UI. I think a lot about the gap between "technically works" and "people actually use it." For HR tools especially, if the interface is confusing, employees will just email HR instead, which defeats the whole purpose of building the tool.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">"Tell me about a challenge you solved"</span>
+          <span class="topic-tag tag-high">Very likely behavioral</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="def-box">
+          <div class="box-label">Use the STAR format</div>
+          <div class="box-text">Situation (what was the context), Task (what were you responsible for), Action (what did you do specifically), Result (what was the outcome). Keep it tight: 90 seconds max.</div>
+        </div>
+        <div class="answer-box">
+          <div class="box-label">Suggested answer (BofA migration)</div>
+          <div class="box-text">At BofA I was tasked with updating legacy Autosys batch jobs across production, updating DB connections and environment variables on a regular cycle. The challenge was that these jobs ran for other teams and any failure had downstream impact. I built a testing pattern across DIT, SIT, UAT, and load testing environments before touching production, so every deployment was validated before it could affect real users. We got to a point where every 2-month deployment was predictable and low-risk. The lesson was that a slow, careful process is actually faster than moving fast and having to roll things back.</div>
+        </div>
+        <div class="answer-box">
+          <div class="box-label">Alternate answer (PaceCircle security design)</div>
+          <div class="box-text">For PaceCircle I had to design authentication from scratch. The challenge was making it stateless and scalable while also properly handling authorization by role. I implemented JWT with Spring Security, set a STATELESS session policy so no server memory is consumed per user, and built a global exception handler so auth failures returned consistent, useful error messages instead of raw stack traces. The result is an auth system that would work the same whether you have 10 users or 10,000.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════ RESUME HIGHLIGHTS ═══════════════════════ -->
+  <div class="section" id="resume">
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Your strongest differentiators for this role</span>
+          <span class="topic-tag tag-high">Know these cold</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <p style="margin-bottom: 10px; color: #5f5e5a;">These parts of your resume map most directly to what this team does. Lead with these.</p>
+        <ul>
+          <li><strong>Angular + Spring Boot + PostgreSQL:</strong> This is their exact stack. You use all three at BofA right now.</li>
+          <li><strong>Role-based access control:</strong> PaceCircle (owner/member) and BofA access reviews (160+ devs, 120+ datasets) both show you think about who should be able to do what.</li>
+          <li><strong>Full-stack migration to modern platforms:</strong> Your BofA OpenShift migration mirrors the modernization work the Senior AI Engineer has done.</li>
+          <li><strong>AI innovation challenge:</strong> Two-time finalist is real evidence of AI interest and initiative, even if your AI experience is less deep than theirs.</li>
+          <li><strong>Security depth:</strong> Your crypto project (Double Ratchet, AES-GCM, El-Gamal) is unusually sophisticated for a SWE 2. It shows you can reason about security at a deep level.</li>
+          <li><strong>CS + IS double major at UNC with 3.79 GPA:</strong> The Information Science major is directly relevant to HR IT work: data governance, information systems, human-computer interaction.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Gaps to address honestly</span>
+          <span class="topic-tag tag-med">Prepare for these</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <div class="danger-box">
+          <div class="box-label">On AI/GenAI depth</div>
+          <div class="box-text">They're a highly specialized AI team. You have AI exposure but not production AI agent experience. Own this directly rather than hoping it doesn't come up. "I haven't built an agent framework in production yet, but here's how I've been learning and here's what excites me about building toward that" lands much better than getting caught overselling.</div>
+        </div>
+        <div class="danger-box">
+          <div class="box-label">On Go and Kafka</div>
+          <div class="box-text">The Senior AI Engineer uses Go and Kafka extensively. You don't have these on your resume. It's fine. "I'm proficient in Java and I've picked up new languages quickly, Go is on my list" is honest. Don't claim proficiency you don't have.</div>
+        </div>
+        <div class="answer-box">
+          <div class="box-label">The reframe for both gaps</div>
+          <div class="box-text">What I bring is a solid full-stack foundation with their exact core stack (Angular, Spring Boot, PostgreSQL), real experience with enterprise-scale systems at BofA, and genuine curiosity about AI. The SWE 2 role is exactly where I should be learning the AI agent work from engineers who've already built it. I'm not coming in to teach them GenAI. I'm coming in to contribute on the full-stack side while growing fast on the AI side with their guidance.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <div class="topic-title-row">
+          <span class="topic-title">Questions to ask them</span>
+          <span class="topic-tag tag-high">Important to have ready</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+      <div class="topic-body">
+        <p style="margin-bottom: 10px; color: #5f5e5a;">Asking sharp questions shows you've done research and thought seriously about the role.</p>
+        <ul>
+          <li>"You built a framework for creating AI agents rather than just individual agents. What were the hardest design decisions in making it general enough to be reusable?"</li>
+          <li>"How do you handle prompt versioning and testing when the AI model behavior can change between model updates?"</li>
+          <li>"For a SWE 2 joining this team, what does the first 90 days usually look like in terms of ramp-up on the AI side versus contributing on the full-stack side?"</li>
+          <li>"How do you think about data privacy when building AI tools that process HR data? Where do the guardrails live in your architecture?"</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+  function toggle(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  }
+</script>
+</body>
+</html>
