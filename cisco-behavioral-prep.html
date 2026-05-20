@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Behavioral Prep</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&family=Literata:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #4f8fff;
+    --accent2: #7c5cfc;
+    --gold: #f5c842;
+    --green: #3dd68c;
+    --red: #ff6b6b;
+    --text: #e8eaf0;
+    --muted: #7a8299;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .eyebrow::after {
+    content: '';
+    height: 1px;
+    width: 40px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: attr(data-num);
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Anti-tangent banner */
+  .tangent-rule {
+    background: linear-gradient(135deg, rgba(245,200,66,0.07), rgba(124,92,252,0.07));
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .tangent-icon {
+    font-size: 22px;
+    line-height: 1.4;
+  }
+
+  .tangent-rule h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--gold);
+  }
+
+  .tangent-rule p {
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .tangent-rule .formula {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .formula-step {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  .fs-s { background: rgba(79,143,255,0.12); color: var(--accent); border: 1px solid rgba(79,143,255,0.2); }
+  .fs-t { background: rgba(61,214,140,0.1); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+  .fs-a { background: rgba(124,92,252,0.12); color: var(--accent2); border: 1px solid rgba(124,92,252,0.2); }
+  .fs-r { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .fs-arrow { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; display: flex; align-items: center; }
+
+  /* Day plan */
+  .phase-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .phase-card:hover { border-color: #303654; }
+  .phase-card:nth-child(1) { animation-delay: 0.05s; }
+  .phase-card:nth-child(2) { animation-delay: 0.1s; }
+  .phase-card:nth-child(3) { animation-delay: 0.15s; }
+  .phase-card:nth-child(4) { animation-delay: 0.2s; }
+  .phase-card:nth-child(5) { animation-delay: 0.25s; }
+
+  .phase-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding-top: 3px;
+  }
+
+  .phase-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .phase-items {
+    color: var(--muted);
+    font-size: 13.5px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .phase-items li {
+    list-style: none;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .phase-items li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent2);
+  }
+
+  .priority {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+
+  .priority.high { background: rgba(255,107,107,0.12); color: var(--red); border: 1px solid rgba(255,107,107,0.2); }
+  .priority.med { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .priority.low { background: rgba(61,214,140,0.1); color: var(--green); border: 1px solid rgba(61,214,140,0.2); }
+
+  /* Story bank */
+  .story-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .story-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .story-header {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 12px;
+  }
+
+  .story-header:hover { background: var(--surface2); }
+
+  .story-title-wrap { flex: 1; }
+
+  .story-theme {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 3px;
+  }
+
+  .story-triggers {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .story-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+    line-height: 1.5;
+    transition: transform 0.2s;
+  }
+
+  .story-card.open .story-toggle { transform: rotate(45deg); color: var(--accent); }
+
+  .story-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .story-card.open .story-body { display: block; }
+
+  .story-row {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 16px;
+    font-size: 13.5px;
+  }
+
+  .story-row:last-child { border-bottom: none; }
+
+  .story-row-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    padding-top: 2px;
+    font-weight: 500;
+  }
+
+  .story-row-content {
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.75;
+  }
+
+  .story-row-content strong {
+    color: var(--text);
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .story-row-content .fill-in {
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  /* Q&A section */
+  .topic-block {
+    margin-bottom: 40px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .topic-header {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topic-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+  }
+
+  .topic-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .qa-list {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+
+  .qa-item {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .qa-item:last-child { border-bottom: none; }
+
+  .qa-question {
+    padding: 16px 24px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+
+  .qa-item:hover .qa-question { background: var(--surface); }
+
+  .qa-q-text {
+    font-style: italic;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .qa-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+    line-height: 1.5;
+    transition: transform 0.2s;
+  }
+
+  .qa-item.open .qa-toggle { transform: rotate(45deg); color: var(--accent); }
+
+  .qa-answer {
+    display: none;
+    padding: 0 24px 20px;
+    color: var(--muted);
+    font-size: 13.5px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    line-height: 1.8;
+  }
+
+  .qa-item.open .qa-answer { display: block; }
+
+  .qa-answer strong {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .qa-answer .tip {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(79,143,255,0.06);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    line-height: 1.7;
+  }
+
+  .qa-answer .warn {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(255,107,107,0.06);
+    border-left: 2px solid var(--red);
+    border-radius: 0 6px 6px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--red);
+    line-height: 1.7;
+  }
+
+  /* Prompt box */
+  .prompt-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .prompt-header {
+    background: linear-gradient(135deg, rgba(79,143,255,0.12), rgba(124,92,252,0.12));
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prompt-header span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .copy-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transition: opacity 0.15s;
+  }
+
+  .copy-btn:hover { opacity: 0.85; }
+
+  .prompt-body {
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.9;
+    white-space: pre-wrap;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* Checklist */
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .check-item {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: var(--surface2); }
+  .check-item.done { opacity: 0.45; }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.15s;
+  }
+
+  .check-item.done .check-box {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+
+  .check-label {
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .check-label strong {
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">Round 2 · Behavioral Prep</div>
+    <h1>Cisco People IT<br><span>Manager Interview</span></h1>
+    <p class="subtitle">30 min · Behavioral · 5 days out · Early career</p>
+  </div>
+
+  <!-- Anti-tangent rule -->
+  <div class="tangent-rule">
+    <div class="tangent-icon">⚠️</div>
+    <div>
+      <h3>Your #1 Job: Stay Tight</h3>
+      <p>You tend to go on tangents when nervous. Every answer has one job: answer the exact question asked, prove one thing with one story, then stop. The formula below is your guardrail. When you feel yourself drifting, ask: "am I still in R?"</p>
+      <div class="formula">
+        <span class="formula-step fs-s">S · Situation</span>
+        <span class="fs-arrow">→</span>
+        <span class="formula-step fs-t">T · Task / Problem</span>
+        <span class="fs-arrow">→</span>
+        <span class="formula-step fs-a">A · Action YOU took</span>
+        <span class="fs-arrow">→</span>
+        <span class="formula-step fs-r">R · Result + What you learned</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Plan -->
+  <div class="section-label" data-num="01">5-Day Plan</div>
+  <div class="phase-grid">
+
+    <div class="phase-card">
+      <div class="phase-day">Day 1</div>
+      <div>
+        <div class="phase-title">Mine Your Stories <span class="priority high">foundation</span></div>
+        <ul class="phase-items">
+          <li>List every work project + side project you've touched in the last 2 years</li>
+          <li>For each, ask: what was hard? what did YOU specifically do? what changed because of it?</li>
+          <li>Identify at least 6 distinct experiences (you'll map them to themes on Day 2)</li>
+          <li>Write rough bullet notes — don't write full sentences yet</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 2</div>
+      <div>
+        <div class="phase-title">Build Your Story Bank <span class="priority high">core work</span></div>
+        <ul class="phase-items">
+          <li>Map your 6 experiences to the 5 core themes below (some stories cover two themes)</li>
+          <li>Write each story in STAR format — keep S+T to 2-3 sentences max</li>
+          <li>Practice saying each story out loud — it sounds different than it reads</li>
+          <li>Time yourself: target 90 seconds per story, 2 minutes max</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 3</div>
+      <div>
+        <div class="phase-title">Cisco Context + Tailoring <span class="priority med">differentiator</span></div>
+        <ul class="phase-items">
+          <li>Research Cisco's People & Communities / HR AI work — look for public blog posts, LinkedIn posts from the team</li>
+          <li>Prepare your "why Cisco / why this team" answer (2-3 specific reasons, not generic)</li>
+          <li>Tailor at least 2 stories to explicitly mention AI tools, data, or non-technical stakeholders</li>
+          <li>Prepare 3 smart questions for the manager (see section 04)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 4</div>
+      <div>
+        <div class="phase-title">Mock Interview Out Loud <span class="priority high">most important</span></div>
+        <ul class="phase-items">
+          <li>Do a full 30-min mock — set a timer, answer every question out loud as if it's real</li>
+          <li>Record yourself on your phone — watch it back once, note where you drifted</li>
+          <li>Focus correction on your tangent habit: where did you add detail that wasn't asked for?</li>
+          <li>Use the new chat prompt below to drill with Claude as your mock interviewer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-day">Day 5</div>
+      <div>
+        <div class="phase-title">Light Review + Rest <span class="priority low">day before</span></div>
+        <ul class="phase-items">
+          <li>Read through your story bullet points once — don't memorize word-for-word</li>
+          <li>Review your 3 questions for the manager</li>
+          <li>Confirm logistics: time zone, Webex link, camera/mic check</li>
+          <li>Sleep well — preparation is done, trust the work</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Story Bank -->
+  <div class="section-label" data-num="02">Story Bank Templates</div>
+  <p style="color: var(--muted); font-size: 13.5px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-weight: 300;">Five themes that cover ~90% of behavioral questions at this level. Fill in the <span style="color: var(--gold);">yellow placeholders</span> with your real details.</p>
+
+  <div class="story-grid">
+
+    <div class="story-card">
+      <div class="story-header" onclick="toggleStory(this)">
+        <div class="story-title-wrap">
+          <div class="story-theme">🤝 Collaboration / Cross-functional Work</div>
+          <div class="story-triggers">Triggers: "tell me about working with a team", "non-technical stakeholders", "different perspectives"</div>
+        </div>
+        <span class="story-toggle">+</span>
+      </div>
+      <div class="story-body">
+        <div class="story-row">
+          <div class="story-row-label">Situation</div>
+          <div class="story-row-content"><span class="fill-in">[project name]</span> at <span class="fill-in">[company/context]</span>. The team included <strong>people from different functions or backgrounds</strong> — e.g., a designer, a PM, a non-technical HR stakeholder, etc.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Task</div>
+          <div class="story-row-content">We needed to <span class="fill-in">[deliver X / solve Y]</span> and my role was <span class="fill-in">[your specific responsibility]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Action</div>
+          <div class="story-row-content">I <strong>specifically</strong> did: <span class="fill-in">[concrete actions — meetings you ran, docs you wrote, decisions you facilitated]</span>. Keep this to 2-3 actions maximum.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Result</div>
+          <div class="story-row-content"><span class="fill-in">[Outcome — shipped, decision made, relationship built]</span>. What I learned: <strong>working across functions means translating, not just communicating</strong> — I now lead with context before diving into technical details.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header" onclick="toggleStory(this)">
+        <div class="story-title-wrap">
+          <div class="story-theme">🌫️ Ambiguity / Working Without Clear Direction</div>
+          <div class="story-triggers">Triggers: "tell me about a time you had unclear requirements", "how do you handle ambiguity", "initiative"</div>
+        </div>
+        <span class="story-toggle">+</span>
+      </div>
+      <div class="story-body">
+        <div class="story-row">
+          <div class="story-row-label">Situation</div>
+          <div class="story-row-content">At <span class="fill-in">[context]</span>, I was given <span class="fill-in">[vague goal or task]</span> with little guidance on how to approach it.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Task</div>
+          <div class="story-row-content">I needed to <strong>define the approach myself</strong> and still deliver something concrete by <span class="fill-in">[deadline or constraint]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Action</div>
+          <div class="story-row-content">I <span class="fill-in">[broke it into pieces / asked clarifying questions / built a prototype to test assumptions / set my own milestones]</span>. Key decision I made on my own: <span class="fill-in">[specific judgment call]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Result</div>
+          <div class="story-row-content"><span class="fill-in">[What you delivered]</span>. Takeaway: I've learned that ambiguity is actually a signal to <strong>clarify scope fast and start small</strong> rather than wait for perfect requirements.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header" onclick="toggleStory(this)">
+        <div class="story-title-wrap">
+          <div class="story-theme">⚡ Delivery Under Pressure</div>
+          <div class="story-triggers">Triggers: "tight deadline", "competing priorities", "how do you manage your workload"</div>
+        </div>
+        <span class="story-toggle">+</span>
+      </div>
+      <div class="story-body">
+        <div class="story-row">
+          <div class="story-row-label">Situation</div>
+          <div class="story-row-content"><span class="fill-in">[Project]</span> — the timeline compressed / a new priority was dropped in / something broke at the worst moment.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Task</div>
+          <div class="story-row-content">I had to deliver <span class="fill-in">[X]</span> by <span class="fill-in">[deadline]</span> while <strong>also handling</strong> <span class="fill-in">[competing thing]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Action</div>
+          <div class="story-row-content">I <span class="fill-in">[triaged / cut scope explicitly / communicated the tradeoff to stakeholders / stayed late / paired with someone]</span>. Important: show you made a <strong>deliberate decision</strong>, not that you just worked harder.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Result</div>
+          <div class="story-row-content"><span class="fill-in">[What shipped, and what the impact was]</span>. What I'd do differently: <span class="fill-in">[honest reflection — don't pretend it was perfect]</span>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header" onclick="toggleStory(this)">
+        <div class="story-title-wrap">
+          <div class="story-theme">💥 Failure or Mistake</div>
+          <div class="story-triggers">Triggers: "tell me about a time something went wrong", "your biggest failure", "what would you do differently"</div>
+        </div>
+        <span class="story-toggle">+</span>
+      </div>
+      <div class="story-body">
+        <div class="story-row">
+          <div class="story-row-label">Situation</div>
+          <div class="story-row-content"><span class="fill-in">[Project or situation]</span>. I made a mistake: <span class="fill-in">[be direct — don't hedge or minimize it]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Task</div>
+          <div class="story-row-content">The impact was <span class="fill-in">[specific consequence]</span> and I had to <strong>own it and fix it</strong>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Action</div>
+          <div class="story-row-content">I <span class="fill-in">[communicated the issue proactively / took accountability / fixed X / changed my process going forward]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Result</div>
+          <div class="story-row-content"><span class="fill-in">[How it resolved]</span>. Since then, I've <strong>changed how I approach <span class="fill-in">[thing]</span></strong> — give a concrete behavior change. This is the most important part of this story.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header" onclick="toggleStory(this)">
+        <div class="story-title-wrap">
+          <div class="story-theme">🤖 Using AI in Real Work</div>
+          <div class="story-triggers">Triggers: "how do you stay current", "AI tools", "tell me about a project where you used AI"</div>
+        </div>
+        <span class="story-toggle">+</span>
+      </div>
+      <div class="story-body">
+        <div class="story-row">
+          <div class="story-row-label">Situation</div>
+          <div class="story-row-content">On <span class="fill-in">[project]</span>, I was using <span class="fill-in">[Copilot / ChatGPT / Claude / Cursor]</span> to help with <span class="fill-in">[specific task — writing tests, generating boilerplate, debugging, etc.]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Task</div>
+          <div class="story-row-content">The goal was to <span class="fill-in">[ship faster / understand unfamiliar code / explore an approach I hadn't used before]</span>.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Action</div>
+          <div class="story-row-content">I used the tool to <span class="fill-in">[specific action]</span>, but I also <strong>verified the output by <span class="fill-in">[how]</span></strong> — show you don't blindly trust it. If it gave wrong output, describe how you caught it.</div>
+        </div>
+        <div class="story-row">
+          <div class="story-row-label">Result</div>
+          <div class="story-row-content"><span class="fill-in">[Time saved / quality improved / feature shipped]</span>. My view: AI tools are a multiplier when you <strong>stay in the driver's seat</strong> — I use them for speed, not to replace judgment.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Q&A -->
+  <div class="section-label" data-num="03">Likely Questions + How to Answer</div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">👤 About You</div>
+      <div class="topic-tag">Almost Certain to Be Asked</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"Tell me about yourself."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          This is not an invitation to recite your resume. The manager wants to know: <strong>who are you as an engineer, and why are you here?</strong> Structure it in 3 beats: (1) where you are now and what you do, (2) one thing you're proud of or what you're drawn to technically, (3) why this role at Cisco. Keep it under 90 seconds. Don't start with "So I was born in..." or go chronologically through every job.
+          <div class="tip">💡 Draft version: "I'm a full-stack engineer with [X] years of experience, primarily in Java and Angular. Lately I've been focused on [specific area — AI integrations / backend systems / etc.]. What drew me to this role specifically is [1-2 concrete reasons tied to the HR AI platform]. I'm excited to work on software that directly affects how employees experience Cisco."</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"Why Cisco? Why this team specifically?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          This question weeds out people who are just job hunting vs. people who actually care. You need <strong>at least one specific reason tied to the HR AI Platform, not Cisco the brand</strong>. Research angles: the intersection of AI and HR is genuinely novel and regulated — there's meaningful engineering challenge there. Cisco's scale means the platform affects tens of thousands of employees. If you find any public posts about the team's work, reference them.
+          <div class="warn">⚠️ Avoid: "Cisco is a great company with lots of opportunity." That's a non-answer. The manager has heard it 50 times.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"Where do you see yourself in 2–3 years?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          As early career, you don't need a 5-year vision. What managers want to hear: you want to <strong>grow technically, take on more ownership, and understand the domain deeply</strong>. Something like: "In the near term I want to become really solid in [AI integrations / full-stack delivery on this platform]. Longer term I'm interested in taking on more technical leadership — owning larger features end to end. I think HR AI is a space where domain knowledge compounds over time, and I want to build that."
+          <div class="tip">💡 Don't say "I want to be a manager" unless you mean it. At 0-2 years, IC growth is the right answer.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">🔨 How You Work</div>
+      <div class="topic-tag">Situational / Behavioral</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"Tell me about a time you had to work with a difficult stakeholder or team member."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Don't throw anyone under the bus. The point of this question is to see if you can <strong>navigate conflict with maturity, not to expose who was wrong</strong>. Frame it as a misalignment, not a personality clash. Show that you tried to understand their perspective before pushing back. Use your Collaboration story template, but pick an example that had real friction in it.
+          <div class="warn">⚠️ Avoid naming the person or calling them difficult. Say "we had different views on the approach" not "my manager was unreasonable."</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"How do you handle feedback or criticism of your work?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          This tests emotional maturity. The right answer: you <strong>welcome it, distinguish between feedback on the work vs. feedback on you personally, and act on it</strong>. Give a brief concrete example — a code review comment you disagreed with at first, but updated after understanding the reason. Show that you can be wrong and be fine with it. Early career engineers who can receive feedback gracefully stand out.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"Tell me about a project you're most proud of."</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Pick something where <strong>you had meaningful ownership</strong>, not just contributed to. It doesn't have to be big — a side project where you made all the decisions is better than a large team project where you wrote one feature. Be specific: what was the technical challenge, what did you decide, what was the outcome. Then connect it to why you care about this work going forward.
+          <div class="tip">💡 If your best example is a side project, lead with it confidently. Side projects show initiative, which matters a lot at the early career level.</div>
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"How do you stay current with new technology, especially AI?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Be honest and specific — don't say "I read tech blogs" generically. Name what you actually do: specific newsletters (TLDR AI, The Batch), repos you follow on GitHub, things you've built to learn, podcasts, papers you've skimmed. Then tie it to action: <strong>"When I learned about RAG, I [built something / read the paper / watched a talk] — here's what I took away."</strong> The manager is hiring for an AI platform — showing you're genuinely curious here is a differentiator.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="topic-block">
+    <div class="topic-header">
+      <div class="topic-name">💬 Manager-Specific</div>
+      <div class="topic-tag">High Probability in a Manager Round</div>
+    </div>
+    <div class="qa-list">
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"What kind of work environment / management style do you thrive in?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          This is the manager trying to figure out if they'll enjoy working with you — and if their style will work for you. Be honest but <strong>frame it in growth terms</strong>: "I do best when I have clear goals but room to figure out the approach. I like managers who give direct feedback — I'd rather know quickly if something isn't working." Avoid: "I like to be left alone" or "I need a lot of structure" at extremes.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="toggleQ(this)">
+          <span class="qa-q-text">"What's something you're actively working to improve?"</span>
+          <span class="qa-toggle">+</span>
+        </div>
+        <div class="qa-answer">
+          Don't say "I work too hard" or give a strength disguised as a weakness. Pick something <strong>real and relevant but not disqualifying</strong> — and show you're taking action on it. For example: "I've realized I sometimes jump into solutions before I've fully scoped the problem. I've been working on this by forcing myself to write a one-pager before I open an IDE. It's slowed my start but improved the quality of what I ship."
+          <div class="tip">💡 Your tangent habit is actually a great real answer here — saying "I'm working on being more concise when communicating technical ideas" shows self-awareness and is highly relevant for cross-functional work.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Questions to Ask -->
+  <div class="section-label" data-num="04">Questions to Ask the Manager</div>
+  <p style="color: var(--muted); font-size: 13.5px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-weight: 300;">Good questions signal that you've thought seriously about the role. Pick 2-3 of these based on what you genuinely want to know.</p>
+
+  <div class="checklist" id="questionList">
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>What does the first 90 days look like for someone joining this team?</strong>
+        Shows you're thinking practically about onboarding, not just getting an offer.
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>What's the current state of the AI platform — is this greenfield, or are you evolving an existing system?</strong>
+        Signals technical curiosity and helps you understand scope.
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>How does the team balance shipping features with responsible AI practices — things like bias review or explainability?</strong>
+        Extremely relevant given the HR AI domain; shows you did your homework.
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>What does success look like for this role in the first 6 months?</strong>
+        Gives you clarity and tells the manager you're results-oriented.
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>What's something the team has shipped recently that you're proud of?</strong>
+        Opens a conversation, shows genuine interest in what they're building.
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-label">
+        <strong>How does the team stay current on AI developments — is there time carved out for learning or experimentation?</strong>
+        Shows you care about growth and is relevant given how fast the AI landscape moves.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Prompt box -->
+  <div class="section-label" data-num="05">Mock Interview Prompt</div>
+  <p style="color: var(--muted); font-size: 13.5px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-weight: 300;">Paste this into a fresh Claude chat on Day 4 for a full behavioral mock drill.</p>
+
+  <div class="prompt-box">
+    <div class="prompt-header">
+      <span>Paste into a new chat</span>
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-body" id="promptText">I have a 30-minute behavioral interview coming up with what I think is the hiring manager for a Software Engineer role on Cisco's People IT team, building an HR AI Platform in Raleigh, NC. I'm early career (0-2 years experience) and I tend to go on tangents when I'm nervous.
+
+Please act as the hiring manager — a senior engineering manager leading a small team building an internal AI platform for HR workflows. Ask me one behavioral question at a time, wait for my answer, then give me:
+1. Direct feedback on whether I answered the question that was asked (or drifted)
+2. What I got right and what I missed
+3. Whether my answer was within a good time range (target 60-90 seconds per answer)
+4. A quick note on what a strong answer would have added
+
+After each answer, ask the next question. At the end, give me an overall assessment and my top 3 things to fix before the real interview.
+
+Questions to cover in order:
+1. Tell me about yourself.
+2. Why Cisco, and why this team specifically?
+3. Tell me about a project you're most proud of.
+4. Tell me about a time you had to work with unclear requirements or ambiguity.
+5. Tell me about a time you made a mistake. What happened and what did you learn?
+6. How do you use AI tools in your day-to-day work?
+7. What's something you're actively working to improve?
+8. What kind of manager or environment do you do your best work in?
+9. Do you have any questions for me?
+
+Be honest and direct. If my answer is too long, vague, or off-topic, tell me clearly. I'd rather hear hard feedback now than in the real interview.
+
+Start with question 1 now.</div>
+  </div>
+
+</div>
+
+<script>
+function toggleQ(el) {
+  const item = el.closest('.qa-item');
+  item.classList.toggle('open');
+}
+
+function toggleStory(el) {
+  const card = el.closest('.story-card');
+  card.classList.toggle('open');
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  const box = el.querySelector('.check-box');
+  box.textContent = el.classList.contains('done') ? '✓' : '';
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptText').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
