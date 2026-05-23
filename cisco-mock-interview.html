@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Mock Interview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&family=Literata:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #4f8fff;
+    --accent2: #7c5cfc;
+    --gold: #f5c842;
+    --green: #3dd68c;
+    --red: #ff6b6b;
+    --text: #e8eaf0;
+    --muted: #7a8299;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Progress */
+  .progress-bar-wrap {
+    margin-bottom: 32px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .progress-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  /* Timer */
+  .timer-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .timer-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .timer-display.warn { color: var(--gold); }
+  .timer-display.danger { color: var(--red); }
+
+  .timer-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 5px;
+    padding: 4px 12px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+
+  .timer-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Interview area */
+  .interview-pane {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .pane-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pane-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .pane-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(79,143,255,0.08);
+    border: 1px solid rgba(79,143,255,0.15);
+    border-radius: 4px;
+    padding: 2px 8px;
+    letter-spacing: 0.06em;
+  }
+
+  .question-text {
+    padding: 22px 24px;
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    min-height: 70px;
+  }
+
+  .answer-area {
+    padding: 0;
+  }
+
+  textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 14.5px;
+    line-height: 1.75;
+    padding: 20px 24px;
+    resize: none;
+    min-height: 160px;
+  }
+
+  textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+  .answer-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .char-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .submit-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 22px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: opacity 0.15s;
+  }
+
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Feedback */
+  .feedback-pane {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeUp 0.35s ease;
+  }
+
+  .feedback-pane.visible { display: block; }
+
+  .feedback-header {
+    background: linear-gradient(135deg, rgba(61,214,140,0.08), rgba(79,143,255,0.08));
+    border-bottom: 1px solid var(--border);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .feedback-icon {
+    font-size: 16px;
+  }
+
+  .feedback-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .feedback-body {
+    padding: 22px 24px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-wrap;
+  }
+
+  .feedback-body strong { color: var(--text); font-weight: 400; }
+
+  .feedback-section {
+    margin-bottom: 16px;
+  }
+
+  .feedback-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 6px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .label-got { color: var(--green); background: rgba(61,214,140,0.08); border: 1px solid rgba(61,214,140,0.15); }
+  .label-missed { color: var(--gold); background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.15); }
+  .label-strong { color: var(--accent); background: rgba(79,143,255,0.08); border: 1px solid rgba(79,143,255,0.15); }
+
+  .next-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 22px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.15s;
+    margin: 0 24px 20px;
+  }
+
+  .next-btn:hover { background: rgba(79,143,255,0.08); }
+
+  /* Loading */
+  .loading {
+    display: none;
+    padding: 28px 24px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .loading.visible { display: flex; }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Summary */
+  .summary-pane {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .summary-pane.visible { display: block; }
+
+  .summary-header {
+    background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(79,143,255,0.12));
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+
+  .summary-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .summary-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .summary-body {
+    padding: 24px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-wrap;
+  }
+
+  .restart-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    margin: 0 24px 24px;
+    transition: opacity 0.15s;
+  }
+
+  .restart-btn:hover { opacity: 0.85; }
+
+  /* Question nav pills */
+  .q-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .q-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    letter-spacing: 0.06em;
+  }
+
+  .q-pill.current { border-color: var(--accent); color: var(--accent); background: rgba(79,143,255,0.08); }
+  .q-pill.done { border-color: var(--green); color: var(--green); background: rgba(61,214,140,0.06); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">30-Min Behavioral Mock</div>
+    <h1>Cisco People IT<br><span>Interview Simulation</span></h1>
+    <p class="subtitle">6 questions &nbsp;·&nbsp; Behavioral + "Why Cisco" &nbsp;·&nbsp; Real AI feedback</p>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span class="progress-label">Progress</span>
+      <span class="progress-count" id="progressCount">Question 1 of 6</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="timer-strip">
+    <span class="timer-label">Session Timer</span>
+    <span class="timer-display" id="timerDisplay">30:00</span>
+    <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">Start</button>
+  </div>
+
+  <div class="q-nav" id="qNav"></div>
+
+  <div class="interview-pane" id="interviewPane">
+    <div class="pane-header">
+      <span class="pane-label" id="paneLabel">Behavioral · Q1</span>
+      <span class="pane-tag" id="paneTag">Delivering Under Pressure</span>
+    </div>
+    <div class="question-text" id="questionText">Loading question...</div>
+    <div class="answer-area">
+      <textarea id="answerInput" placeholder="Type your answer here. Aim for 90–120 seconds when spoken aloud — roughly 200–300 words. Use the STAR structure: Situation, Task, Action, Result." oninput="updateCharCount()"></textarea>
+      <div class="answer-footer">
+        <span class="char-count" id="charCount">0 words</span>
+        <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">Submit Answer →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-pane" id="feedbackPane">
+    <div class="feedback-header">
+      <span class="feedback-icon">📋</span>
+      <span class="feedback-title">Interviewer Feedback</span>
+    </div>
+    <div class="loading" id="loadingIndicator">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <span class="loading-text">Analyzing your answer...</span>
+    </div>
+    <div class="feedback-body" id="feedbackBody" style="display:none"></div>
+    <button class="next-btn" id="nextBtn" style="display:none" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <div class="summary-pane" id="summaryPane">
+    <div class="summary-header">
+      <div class="summary-title">Interview Complete</div>
+      <div class="summary-sub">Overall assessment + top 3 focus areas</div>
+    </div>
+    <div class="loading" id="summaryLoading">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <span class="loading-text">Generating your assessment...</span>
+    </div>
+    <div class="summary-body" id="summaryBody" style="display:none"></div>
+    <button class="restart-btn" onclick="restart()" style="display:none" id="restartBtn">Restart Interview</button>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    tag: "Delivering Under Pressure",
+    label: "Behavioral · Q1",
+    text: "Tell me about a time you had to deliver under significant pressure — a tight deadline, an unexpected crisis, or a messy situation where the team needed someone to stay calm. Walk me through what happened and how you handled it."
+  },
+  {
+    tag: "Learning Fast",
+    label: "Behavioral · Q2",
+    text: "Describe a time you joined a new team or project and had to get up to speed quickly on an unfamiliar stack, domain, or codebase. What was your approach and how long did it take before you were contributing meaningfully?"
+  },
+  {
+    tag: "Difficult Teammate",
+    label: "Behavioral · Q3",
+    text: "Tell me about a time you worked with a teammate who was struggling — whether with performance, follow-through, or a communication issue. How did you handle it, and what was the outcome?"
+  },
+  {
+    tag: "Cross-Functional Work",
+    label: "Behavioral · Q4",
+    text: "Give me an example of a time you worked closely with non-technical stakeholders — business partners, legal, HR, leadership, or another team outside engineering. How did you communicate, and what made the collaboration work?"
+  },
+  {
+    tag: "Owning a Failure",
+    label: "Behavioral · Q5",
+    text: "Tell me about a mistake or failure you were responsible for. What happened, how did you respond, and what did you learn?"
+  },
+  {
+    tag: "Why Cisco",
+    label: "Motivation · Q6",
+    text: "Why Cisco specifically — and why this team? There are a lot of places doing interesting engineering work. What makes this role the right fit for where you are right now?"
+  }
+];
+
+const SYSTEM_PROMPT = `You are a senior engineering manager at Cisco conducting a behavioral interview for a Software Engineer role on the People IT team, building an HR AI Platform in Raleigh, NC.
+
+The role context:
+- The team is tight-knit and collaborative, led by a manager (Andy) who prizes trust and collaboration over heroics
+- The first 1-2 months are explicitly observation/ramp-up mode; the team expects this
+- The team interfaces frequently with non-engineers: HR business partners, legal, compliance
+- The team keeps up with new AI releases and is building AI-powered HR tools
+- Projects run in parallel; the environment is fast-moving
+- The stack is Java, Spring Boot, Angular, plus AI/LLM integration work
+
+Your job:
+- Give honest, direct, specific feedback on the candidate's answer
+- Structure your feedback in exactly three labeled sections:
+  ✓ WHAT YOU GOT RIGHT — what worked, what showed well
+  ⚠ WHAT YOU MISSED OR COULD STRENGTHEN — specific gaps, missed STAR elements, missed Cisco-relevant angles
+  → WHAT A STRONG ANSWER LOOKS LIKE — one concrete paragraph showing what the ideal answer would emphasize
+- Be direct and honest. Don't pad with empty praise.
+- Watch for: over-use of "I" when "we" is more accurate, heroic framing, vague outcomes, missing Cisco-relevant angles (AI curiosity, ramp-up comfort, cross-functional ease, team trust)
+- Keep feedback to ~250-350 words total. Concise and specific.
+- Do NOT restate the question. Jump straight to feedback.`;
+
+let currentQ = 0;
+let answers = [];
+let timerInterval = null;
+let timerRunning = false;
+let secondsLeft = 30 * 60;
+
+// Init
+function init() {
+  renderNav();
+  loadQuestion();
+}
+
+function renderNav() {
+  const nav = document.getElementById('qNav');
+  nav.innerHTML = QUESTIONS.map((q, i) => {
+    let cls = 'q-pill';
+    if (i === currentQ) cls += ' current';
+    else if (i < currentQ) cls += ' done';
+    return `<span class="${cls}">${i < currentQ ? '✓ ' : ''}Q${i+1}: ${q.tag}</span>`;
+  }).join('');
+}
+
+function loadQuestion() {
+  const q = QUESTIONS[currentQ];
+  document.getElementById('paneLabel').textContent = q.label;
+  document.getElementById('paneTag').textContent = q.tag;
+  document.getElementById('questionText').textContent = `"${q.text}"`;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('charCount').textContent = '0 words';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('feedbackPane').classList.remove('visible');
+  document.getElementById('feedbackBody').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('loadingIndicator').classList.remove('visible');
+
+  const total = QUESTIONS.length;
+  const done = currentQ;
+  document.getElementById('progressCount').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('progressFill').style.width = `${(done / total) * 100}%`;
+
+  renderNav();
+}
+
+function updateCharCount() {
+  const words = document.getElementById('answerInput').value.trim().split(/\s+/).filter(w => w.length > 0);
+  document.getElementById('charCount').textContent = `${words.length} words`;
+}
+
+async function submitAnswer() {
+  const answer = document.getElementById('answerInput').value.trim();
+  if (!answer || answer.split(/\s+/).length < 20) {
+    alert('Please write a fuller answer before submitting — aim for at least 200 words.');
+    return;
+  }
+
+  answers.push({ question: QUESTIONS[currentQ].text, answer });
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('feedbackPane').classList.add('visible');
+  document.getElementById('loadingIndicator').classList.add('visible');
+
+  const q = QUESTIONS[currentQ];
+  const userPrompt = `Question asked: "${q.text}"
+
+Candidate's answer:
+"""
+${answer}
+"""
+
+Give feedback now.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await res.json();
+    const feedback = data.content?.find(b => b.type === 'text')?.text || 'Could not load feedback.';
+
+    document.getElementById('loadingIndicator').classList.remove('visible');
+    document.getElementById('feedbackBody').style.display = 'block';
+    document.getElementById('feedbackBody').textContent = feedback;
+
+    if (currentQ < QUESTIONS.length - 1) {
+      document.getElementById('nextBtn').style.display = 'inline-block';
+      document.getElementById('nextBtn').textContent = `Next: ${QUESTIONS[currentQ + 1].tag} →`;
+    } else {
+      document.getElementById('nextBtn').style.display = 'inline-block';
+      document.getElementById('nextBtn').textContent = 'View Overall Assessment →';
+    }
+
+  } catch (err) {
+    document.getElementById('loadingIndicator').classList.remove('visible');
+    document.getElementById('feedbackBody').style.display = 'block';
+    document.getElementById('feedbackBody').textContent = 'Error fetching feedback. Check your connection and try again.';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+  }
+}
+
+async function nextQuestion() {
+  currentQ++;
+
+  if (currentQ >= QUESTIONS.length) {
+    document.getElementById('interviewPane').style.display = 'none';
+    document.getElementById('feedbackPane').style.display = 'none';
+    document.getElementById('summaryPane').classList.add('visible');
+    document.getElementById('summaryLoading').classList.add('visible');
+
+    const progressFill = document.getElementById('progressFill');
+    progressFill.style.width = '100%';
+    document.getElementById('progressCount').textContent = 'Complete';
+
+    renderNav();
+    await generateSummary();
+    return;
+  }
+
+  loadQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function generateSummary() {
+  const transcript = answers.map((a, i) =>
+    `Q${i+1} (${QUESTIONS[i].tag}): "${a.question}"\nAnswer: ${a.answer}`
+  ).join('\n\n---\n\n');
+
+  const prompt = `You conducted a 30-minute behavioral interview. Here is the full transcript:\n\n${transcript}\n\nNow give an overall assessment covering:\n1. OVERALL IMPRESSION — 2-3 sentences on the candidate's general presentation\n2. STRONGEST MOMENT — which answer landed best and why\n3. TOP 3 THINGS TO FOCUS ON BEFORE THE INTERVIEW — specific, actionable, ordered by importance\n4. ONE THING TO WATCH OUT FOR — a pattern or habit that could cost them the offer\n\nBe direct and honest. No empty encouragement. ~300 words.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const summary = data.content?.find(b => b.type === 'text')?.text || 'Could not generate summary.';
+    document.getElementById('summaryLoading').classList.remove('visible');
+    document.getElementById('summaryBody').style.display = 'block';
+    document.getElementById('summaryBody').textContent = summary;
+    document.getElementById('restartBtn').style.display = 'inline-block';
+
+  } catch (err) {
+    document.getElementById('summaryLoading').classList.remove('visible');
+    document.getElementById('summaryBody').style.display = 'block';
+    document.getElementById('summaryBody').textContent = 'Error generating summary.';
+    document.getElementById('restartBtn').style.display = 'inline-block';
+  }
+}
+
+function restart() {
+  currentQ = 0;
+  answers = [];
+  document.getElementById('interviewPane').style.display = 'block';
+  document.getElementById('feedbackPane').style.display = '';
+  document.getElementById('summaryPane').classList.remove('visible');
+  document.getElementById('summaryBody').style.display = 'none';
+  document.getElementById('restartBtn').style.display = 'none';
+  secondsLeft = 30 * 60;
+  updateTimerDisplay();
+  loadQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Timer
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timerBtn').textContent = 'Resume';
+  } else {
+    timerRunning = true;
+    document.getElementById('timerBtn').textContent = 'Pause';
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      updateTimerDisplay();
+      if (secondsLeft <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timerDisplay').textContent = '00:00';
+      }
+    }, 1000);
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  const display = document.getElementById('timerDisplay');
+  display.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  display.className = 'timer-display';
+  if (secondsLeft <= 300) display.classList.add('danger');
+  else if (secondsLeft <= 600) display.classList.add('warn');
+}
+
+init();
+</script>
+</body>
+</html>
