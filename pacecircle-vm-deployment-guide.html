@@ -1,619 +1,495 @@
-# Deploying PaceCircle Backend to an Oracle Cloud VM: A Fundamentals Guide
-
-Audience note: you know Java/Spring Boot well. This guide assumes zero ops background and builds it from first principles. Each section has: **What/Why**, **Steps**, **Verify**, **Common mistakes**, and **Rabbit holes to skip** (things you could spend hours on that don't matter for a 100-user app).
-
----
-
-## 0. The Big Picture First
-
-Before any commands, understand what you're actually building:
-
-```
-Internet → Oracle Cloud Security List (firewall #1)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deploying PaceCircle Backend: A Fundamentals Guide</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+    color: #1c1f2b;
+    background: #fcfcfa;
+  }
+  h1 {
+    font-size: 2em;
+    border-bottom: 3px solid #e8b84b;
+    padding-bottom: 0.3em;
+  }
+  h2 {
+    margin-top: 2em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.2em;
+    color: #111217;
+  }
+  h3 {
+    color: #1c1f2b;
+    margin-top: 1.4em;
+  }
+  code {
+    background: #f0f0ec;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+  }
+  pre {
+    background: #111217;
+    color: #e8e8e8;
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid #e8b84b;
+    margin-left: 0;
+    padding-left: 1em;
+    color: #444;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 2.5em 0;
+  }
+  li {
+    margin-bottom: 0.3em;
+  }
+  a {
+    color: #0a6cad;
+  }
+</style>
+</head>
+<body>
+<h1 id="deploying-pacecircle-backend-to-an-oracle-cloud-vm-a-fundamentals-guide">Deploying PaceCircle Backend to an Oracle Cloud VM: A Fundamentals Guide</h1>
+<p>Audience note: you know Java/Spring Boot well. This guide assumes zero ops background and builds it from first principles. Each section has: <strong>What/Why</strong>, <strong>Steps</strong>, <strong>Verify</strong>, <strong>Common mistakes</strong>, and <strong>Rabbit holes to skip</strong> (things you could spend hours on that don't matter for a 100-user app).</p>
+<hr />
+<h2 id="0-the-big-picture-first">0. The Big Picture First</h2>
+<p>Before any commands, understand what you're actually building:</p>
+<pre><code>Internet → Oracle Cloud Security List (firewall #1)
          → VM's own firewall, ufw (firewall #2)
          → Caddy (port 443, handles HTTPS/TLS)
          → Your Spring Boot container (port 8080, internal only)
          → Postgres container (port 5432, internal only, never exposed to internet)
-```
-
-Two firewalls exist because Oracle Cloud's "Security List" controls traffic at the cloud network level (before it even reaches your VM's network card), while `ufw` controls traffic at the OS level (after it arrives). Miss either one and you're either unreachable or insecure. This trips up almost everyone the first time, which is why it's called out explicitly in section 4.
-
-Caddy sits in front of your app as a **reverse proxy**: a piece of software that receives the public internet traffic, terminates TLS (decrypts HTTPS), and forwards plain HTTP traffic internally to your Spring Boot app. Your app itself never needs to know about certificates.
-
----
-
-## 1. SSH & Access
-
-### What/Why
-
-SSH (Secure Shell) is an encrypted protocol for remotely controlling a computer via terminal. You authenticate with an **SSH key pair** instead of a password:
-
-- **Private key** (stays on your laptop, never shared, e.g. `~/.ssh/id_ed25519`): proves your identity.
-- **Public key** (e.g. `~/.ssh/id_ed25519.pub`): goes on the server, lists who's allowed in.
-
-The server has a list of public keys it trusts (`~/.ssh/authorized_keys`). When you connect, your laptop proves it holds the matching private key, using cryptographic math, without ever sending the private key over the network. This is more secure than passwords because there's no password to brute-force or phish, and the private key never leaves your machine.
-
-### Steps
-
-**1.1 Generate a key pair (if you don't already have one)**
-
-```bash
-ssh-keygen -t ed25519 -C "vicki-pacecircle"
-```
-
-- `-t ed25519` picks a modern, fast, secure algorithm (better than the older `rsa`).
-- `-C` is just a label/comment to help you identify the key later.
-- When prompted for a passphrase, you can add one (encrypts the private key file itself, asked each time you use it) or leave it blank. A passphrase protects you if your laptop is stolen; for a side project, optional.
-
-This creates `id_ed25519` (private, never share) and `id_ed25519.pub` (public, safe to share).
-
-**1.2 Provide your public key when creating the Oracle instance**
-
-When you launch the Ampere A1 instance in the Oracle Cloud console, there's an "Add SSH keys" step. Paste the contents of `id_ed25519.pub` there, or upload the file. Oracle bakes it into the VM's `authorized_keys` on first boot via `cloud-init` (a startup script system that configures cloud VMs on first boot).
-
-**1.3 Connect**
-
-Oracle gives you a public IP after the instance launches. The default user on Ubuntu cloud images is usually `ubuntu`.
-
-```bash
-ssh -i ~/.ssh/id_ed25519 ubuntu@<VM_PUBLIC_IP>
-```
-
-`-i` specifies which private key file to use. If it's your only/default key, you can omit `-i`.
-
-**1.4 Create a non-root sudo user**
-
-You're logged in as `ubuntu`, which already has passwordless `sudo` on Oracle's images, so technically you could stop here. But it's good practice to create a personal user that mirrors what you'd do on a self-managed box, and matches what most tutorials assume:
-
-```bash
-sudo adduser vicki
+</code></pre>
+<p>Two firewalls exist because Oracle Cloud's "Security List" controls traffic at the cloud network level (before it even reaches your VM's network card), while <code>ufw</code> controls traffic at the OS level (after it arrives). Miss either one and you're either unreachable or insecure. This trips up almost everyone the first time, which is why it's called out explicitly in section 4.</p>
+<p>Caddy sits in front of your app as a <strong>reverse proxy</strong>: a piece of software that receives the public internet traffic, terminates TLS (decrypts HTTPS), and forwards plain HTTP traffic internally to your Spring Boot app. Your app itself never needs to know about certificates.</p>
+<hr />
+<h2 id="1-ssh-access">1. SSH &amp; Access</h2>
+<h3 id="whatwhy">What/Why</h3>
+<p>SSH (Secure Shell) is an encrypted protocol for remotely controlling a computer via terminal. You authenticate with an <strong>SSH key pair</strong> instead of a password:</p>
+<ul>
+<li><strong>Private key</strong> (stays on your laptop, never shared, e.g. <code>~/.ssh/id_ed25519</code>): proves your identity.</li>
+<li><strong>Public key</strong> (e.g. <code>~/.ssh/id_ed25519.pub</code>): goes on the server, lists who's allowed in.</li>
+</ul>
+<p>The server has a list of public keys it trusts (<code>~/.ssh/authorized_keys</code>). When you connect, your laptop proves it holds the matching private key, using cryptographic math, without ever sending the private key over the network. This is more secure than passwords because there's no password to brute-force or phish, and the private key never leaves your machine.</p>
+<h3 id="steps">Steps</h3>
+<p><strong>1.1 Generate a key pair (if you don't already have one)</strong></p>
+<pre><code class="language-bash">ssh-keygen -t ed25519 -C &quot;vicki-pacecircle&quot;
+</code></pre>
+<ul>
+<li><code>-t ed25519</code> picks a modern, fast, secure algorithm (better than the older <code>rsa</code>).</li>
+<li><code>-C</code> is just a label/comment to help you identify the key later.</li>
+<li>When prompted for a passphrase, you can add one (encrypts the private key file itself, asked each time you use it) or leave it blank. A passphrase protects you if your laptop is stolen; for a side project, optional.</li>
+</ul>
+<p>This creates <code>id_ed25519</code> (private, never share) and <code>id_ed25519.pub</code> (public, safe to share).</p>
+<p><strong>1.2 Provide your public key when creating the Oracle instance</strong></p>
+<p>When you launch the Ampere A1 instance in the Oracle Cloud console, there's an "Add SSH keys" step. Paste the contents of <code>id_ed25519.pub</code> there, or upload the file. Oracle bakes it into the VM's <code>authorized_keys</code> on first boot via <code>cloud-init</code> (a startup script system that configures cloud VMs on first boot).</p>
+<p><strong>1.3 Connect</strong></p>
+<p>Oracle gives you a public IP after the instance launches. The default user on Ubuntu cloud images is usually <code>ubuntu</code>.</p>
+<pre><code class="language-bash">ssh -i ~/.ssh/id_ed25519 ubuntu@&lt;VM_PUBLIC_IP&gt;
+</code></pre>
+<p><code>-i</code> specifies which private key file to use. If it's your only/default key, you can omit <code>-i</code>.</p>
+<p><strong>1.4 Create a non-root sudo user</strong></p>
+<p>You're logged in as <code>ubuntu</code>, which already has passwordless <code>sudo</code> on Oracle's images, so technically you could stop here. But it's good practice to create a personal user that mirrors what you'd do on a self-managed box, and matches what most tutorials assume:</p>
+<pre><code class="language-bash">sudo adduser vicki
 sudo usermod -aG sudo vicki
-```
-
-- `adduser` creates the user and home directory, prompts for a password (used only for local `sudo` prompts, not SSH).
-- `usermod -aG sudo vicki` adds `vicki` to the `sudo` group, granting admin rights. `-aG` means "append to this group" (without `-a` you'd overwrite all existing group memberships, a classic mistake).
-
-Now copy your SSH key to the new user so you can log in as them too:
-
-```bash
-sudo rsync --archive --chown=vicki:vicki ~/.ssh /home/vicki
-```
-
-Test in a **second terminal window** (keep your first session open):
-
-```bash
-ssh -i ~/.ssh/id_ed25519 vicki@<VM_PUBLIC_IP>
-```
-
-### Verify
-
-- You can log in as `vicki` and run `sudo whoami` → should print `root`.
-- `ssh ubuntu@<IP>` still works too (don't disable it yet, see mistakes below).
-
-### Common mistakes
-
-- **Disabling password auth or the `ubuntu` user before confirming your new user works.** Always test the new login path in a fresh terminal tab while your original session is still open. If the new path fails, you still have a way in.
-- **Forgetting `-a` in `usermod -aG sudo vicki`.** This can strip other group memberships.
-- **Losing the private key.** There's no "forgot password" for SSH keys. Back up `~/.ssh/id_ed25519` somewhere safe (password manager, encrypted drive). If lost, Oracle Cloud consoles do have a recovery path (cloud-init / serial console), but it's a hassle.
-
-### Rabbit holes to skip
-
-- SSH certificate authorities, `ssh-agent` forwarding, bastion hosts. Overkill for a solo project.
-
----
-
-## 2. Linux Basics for Servers
-
-### What/Why
-
-You'll mostly need: navigating, reading logs, understanding permissions, and checking what's running. You don't need to become a Linux power user.
-
-### Filesystem navigation
-
-```bash
-pwd          # print working directory (where am I)
+</code></pre>
+<ul>
+<li><code>adduser</code> creates the user and home directory, prompts for a password (used only for local <code>sudo</code> prompts, not SSH).</li>
+<li><code>usermod -aG sudo vicki</code> adds <code>vicki</code> to the <code>sudo</code> group, granting admin rights. <code>-aG</code> means "append to this group" (without <code>-a</code> you'd overwrite all existing group memberships, a classic mistake).</li>
+</ul>
+<p>Now copy your SSH key to the new user so you can log in as them too:</p>
+<pre><code class="language-bash">sudo rsync --archive --chown=vicki:vicki ~/.ssh /home/vicki
+</code></pre>
+<p>Test in a <strong>second terminal window</strong> (keep your first session open):</p>
+<pre><code class="language-bash">ssh -i ~/.ssh/id_ed25519 vicki@&lt;VM_PUBLIC_IP&gt;
+</code></pre>
+<h3 id="verify">Verify</h3>
+<ul>
+<li>You can log in as <code>vicki</code> and run <code>sudo whoami</code> → should print <code>root</code>.</li>
+<li><code>ssh ubuntu@&lt;IP&gt;</code> still works too (don't disable it yet, see mistakes below).</li>
+</ul>
+<h3 id="common-mistakes">Common mistakes</h3>
+<ul>
+<li><strong>Disabling password auth or the <code>ubuntu</code> user before confirming your new user works.</strong> Always test the new login path in a fresh terminal tab while your original session is still open. If the new path fails, you still have a way in.</li>
+<li><strong>Forgetting <code>-a</code> in <code>usermod -aG sudo vicki</code>.</strong> This can strip other group memberships.</li>
+<li><strong>Losing the private key.</strong> There's no "forgot password" for SSH keys. Back up <code>~/.ssh/id_ed25519</code> somewhere safe (password manager, encrypted drive). If lost, Oracle Cloud consoles do have a recovery path (cloud-init / serial console), but it's a hassle.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip">Rabbit holes to skip</h3>
+<ul>
+<li>SSH certificate authorities, <code>ssh-agent</code> forwarding, bastion hosts. Overkill for a solo project.</li>
+</ul>
+<hr />
+<h2 id="2-linux-basics-for-servers">2. Linux Basics for Servers</h2>
+<h3 id="whatwhy_1">What/Why</h3>
+<p>You'll mostly need: navigating, reading logs, understanding permissions, and checking what's running. You don't need to become a Linux power user.</p>
+<h3 id="filesystem-navigation">Filesystem navigation</h3>
+<pre><code class="language-bash">pwd          # print working directory (where am I)
 ls -la       # list files, -l = long format (permissions, size, owner), -a = include hidden (dotfiles)
-cd /opt      # change directory; /opt is a common convention for "optional/third-party application software"
-```
-
-Key directories you'll touch:
-- `/home/vicki` — your personal files.
-- `/opt/pacecircle` or similar — good place to put your app's deployment files (docker-compose.yml, .env).
-- `/etc` — system-wide configuration files.
-- `/var/log` — system logs.
-
-### File permissions
-
-Run `ls -la` and you'll see something like:
-
-```
--rw-r--r-- 1 vicki vicki 220 Jan 1 12:00 .env
-```
-
-Breaking down `-rw-r--r--`:
-- First character: file type (`-` = regular file, `d` = directory).
-- Next 9 characters, in 3 groups of 3: permissions for **owner**, **group**, **others**. Each group is `r` (read), `w` (write), `x` (execute).
-
-So `rw-r--r--` means: owner can read/write, group can read, everyone else can read. For a `.env` file containing secrets, you want this tighter:
-
-```bash
-chmod 600 .env
-```
-
-`600` = owner can read+write (6 = 4+2), group and others get nothing. This is something Spring/Java devs often skip but matters a lot on a real server, since any other user account or compromised process on the box could otherwise read your DB password.
-
-### Viewing logs
-
-Two log systems you'll encounter:
-
-1. **systemd journal** (for system services): `journalctl -u <service-name>` e.g. `journalctl -u docker -f` (`-f` = follow, like `tail -f`, streams new lines live).
-2. **Docker container logs** (covered in section 3): `docker logs <container-name>`.
-
-### systemctl basics
-
-`systemd` is the system that manages services (background processes) on modern Linux. Docker itself runs as a systemd service.
-
-```bash
-sudo systemctl status docker     # is it running, and recent log lines
+cd /opt      # change directory; /opt is a common convention for &quot;optional/third-party application software&quot;
+</code></pre>
+<p>Key directories you'll touch:
+- <code>/home/vicki</code> — your personal files.
+- <code>/opt/pacecircle</code> or similar — good place to put your app's deployment files (docker-compose.yml, .env).
+- <code>/etc</code> — system-wide configuration files.
+- <code>/var/log</code> — system logs.</p>
+<h3 id="file-permissions">File permissions</h3>
+<p>Run <code>ls -la</code> and you'll see something like:</p>
+<pre><code>-rw-r--r-- 1 vicki vicki 220 Jan 1 12:00 .env
+</code></pre>
+<p>Breaking down <code>-rw-r--r--</code>:
+- First character: file type (<code>-</code> = regular file, <code>d</code> = directory).
+- Next 9 characters, in 3 groups of 3: permissions for <strong>owner</strong>, <strong>group</strong>, <strong>others</strong>. Each group is <code>r</code> (read), <code>w</code> (write), <code>x</code> (execute).</p>
+<p>So <code>rw-r--r--</code> means: owner can read/write, group can read, everyone else can read. For a <code>.env</code> file containing secrets, you want this tighter:</p>
+<pre><code class="language-bash">chmod 600 .env
+</code></pre>
+<p><code>600</code> = owner can read+write (6 = 4+2), group and others get nothing. This is something Spring/Java devs often skip but matters a lot on a real server, since any other user account or compromised process on the box could otherwise read your DB password.</p>
+<h3 id="viewing-logs">Viewing logs</h3>
+<p>Two log systems you'll encounter:</p>
+<ol>
+<li><strong>systemd journal</strong> (for system services): <code>journalctl -u &lt;service-name&gt;</code> e.g. <code>journalctl -u docker -f</code> (<code>-f</code> = follow, like <code>tail -f</code>, streams new lines live).</li>
+<li><strong>Docker container logs</strong> (covered in section 3): <code>docker logs &lt;container-name&gt;</code>.</li>
+</ol>
+<h3 id="systemctl-basics">systemctl basics</h3>
+<p><code>systemd</code> is the system that manages services (background processes) on modern Linux. Docker itself runs as a systemd service.</p>
+<pre><code class="language-bash">sudo systemctl status docker     # is it running, and recent log lines
 sudo systemctl enable docker      # start automatically on boot
 sudo systemctl restart docker     # restart it
-```
-
-### What's running, what's listening
-
-```bash
-ps aux | grep java          # list all processes, filter for "java"
+</code></pre>
+<h3 id="whats-running-whats-listening">What's running, what's listening</h3>
+<pre><code class="language-bash">ps aux | grep java          # list all processes, filter for &quot;java&quot;
 sudo ss -tulpn               # show listening ports (replaces older `netstat`)
-```
-
-`ss -tulpn` flags: `-t` TCP, `-u` UDP, `-l` listening sockets only, `-p` show the process, `-n` numeric ports (skip name resolution, faster). You'll use this constantly to confirm "is my app actually bound to this port" and "is anything unexpectedly listening on a port I didn't intend to expose."
-
-### Verify
-
-- Run `sudo ss -tulpn` right now on a fresh VM. You should see almost nothing listening except SSH on port 22. That's your baseline; compare against it later when you suspect something unexpected is exposed.
-
-### Common mistakes
-
-- Running everything as `root` "just to avoid permission errors." This removes a safety net; if a process is compromised or buggy, root-level damage is much worse.
-- Editing files with `nano` or `vim` without understanding save/quit (`nano`: Ctrl+O to save, Ctrl+X to exit; `vim`: `:wq` to save and quit, `:q!` to quit without saving). Get comfortable with one before you're mid-deployment under pressure.
-
-### Rabbit holes to skip
-
-- Deep dive into systemd unit file writing, advanced `sed`/`awk` scripting, shell customization. Not needed here.
-
----
-
-## 3. Docker on a Server
-
-### What/Why
-
-You already built the Dockerfile and docker-compose.yml locally; the concepts transfer directly. The differences on a server: you care more about restart policies (server reboots, e.g. for maintenance, shouldn't take your app down permanently), log rotation (logs that grow forever can fill the disk), and secret handling (no `.env` committed to git, ever).
-
-### Install Docker
-
-Ubuntu's default repos have an old Docker version; use Docker's official install script instead:
-
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
+</code></pre>
+<p><code>ss -tulpn</code> flags: <code>-t</code> TCP, <code>-u</code> UDP, <code>-l</code> listening sockets only, <code>-p</code> show the process, <code>-n</code> numeric ports (skip name resolution, faster). You'll use this constantly to confirm "is my app actually bound to this port" and "is anything unexpectedly listening on a port I didn't intend to expose."</p>
+<h3 id="verify_1">Verify</h3>
+<ul>
+<li>Run <code>sudo ss -tulpn</code> right now on a fresh VM. You should see almost nothing listening except SSH on port 22. That's your baseline; compare against it later when you suspect something unexpected is exposed.</li>
+</ul>
+<h3 id="common-mistakes_1">Common mistakes</h3>
+<ul>
+<li>Running everything as <code>root</code> "just to avoid permission errors." This removes a safety net; if a process is compromised or buggy, root-level damage is much worse.</li>
+<li>Editing files with <code>nano</code> or <code>vim</code> without understanding save/quit (<code>nano</code>: Ctrl+O to save, Ctrl+X to exit; <code>vim</code>: <code>:wq</code> to save and quit, <code>:q!</code> to quit without saving). Get comfortable with one before you're mid-deployment under pressure.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_1">Rabbit holes to skip</h3>
+<ul>
+<li>Deep dive into systemd unit file writing, advanced <code>sed</code>/<code>awk</code> scripting, shell customization. Not needed here.</li>
+</ul>
+<hr />
+<h2 id="3-docker-on-a-server">3. Docker on a Server</h2>
+<h3 id="whatwhy_2">What/Why</h3>
+<p>You already built the Dockerfile and docker-compose.yml locally; the concepts transfer directly. The differences on a server: you care more about restart policies (server reboots, e.g. for maintenance, shouldn't take your app down permanently), log rotation (logs that grow forever can fill the disk), and secret handling (no <code>.env</code> committed to git, ever).</p>
+<h3 id="install-docker">Install Docker</h3>
+<p>Ubuntu's default repos have an old Docker version; use Docker's official install script instead:</p>
+<pre><code class="language-bash">curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker vicki
-```
-
-The last line adds your user to the `docker` group so you don't need `sudo` for every docker command. **Log out and back in** (or run `newgrp docker`) for the group change to apply.
-
-### `docker run` vs `docker compose`
-
-- `docker run` starts a single container with flags for everything (ports, env vars, volumes). Fine for quick tests, painful for multi-container apps.
-- `docker compose` (the `docker-compose.yml` you already have) declares multiple services (your app + Postgres) and their relationships in one file, started together with one command:
-
-```bash
-docker compose up -d
-```
-
-`-d` = detached, runs in background instead of tying up your terminal.
-
-### Restart policies
-
-Add this to each service in your `docker-compose.yml`:
-
-```yaml
-services:
+</code></pre>
+<p>The last line adds your user to the <code>docker</code> group so you don't need <code>sudo</code> for every docker command. <strong>Log out and back in</strong> (or run <code>newgrp docker</code>) for the group change to apply.</p>
+<h3 id="docker-run-vs-docker-compose"><code>docker run</code> vs <code>docker compose</code></h3>
+<ul>
+<li><code>docker run</code> starts a single container with flags for everything (ports, env vars, volumes). Fine for quick tests, painful for multi-container apps.</li>
+<li><code>docker compose</code> (the <code>docker-compose.yml</code> you already have) declares multiple services (your app + Postgres) and their relationships in one file, started together with one command:</li>
+</ul>
+<pre><code class="language-bash">docker compose up -d
+</code></pre>
+<p><code>-d</code> = detached, runs in background instead of tying up your terminal.</p>
+<h3 id="restart-policies">Restart policies</h3>
+<p>Add this to each service in your <code>docker-compose.yml</code>:</p>
+<pre><code class="language-yaml">services:
   app:
     restart: unless-stopped
   db:
     restart: unless-stopped
-```
-
-`unless-stopped` means: restart automatically on crash or VM reboot, unless you explicitly ran `docker stop`. This is what gives you "auto-restarting" from your goal list. The alternative `always` will even restart a container you manually stopped, after a host reboot, which is usually not what you want.
-
-### Viewing container logs
-
-```bash
-docker compose logs -f app        # follow logs for just the app service
+</code></pre>
+<p><code>unless-stopped</code> means: restart automatically on crash or VM reboot, unless you explicitly ran <code>docker stop</code>. This is what gives you "auto-restarting" from your goal list. The alternative <code>always</code> will even restart a container you manually stopped, after a host reboot, which is usually not what you want.</p>
+<h3 id="viewing-container-logs">Viewing container logs</h3>
+<pre><code class="language-bash">docker compose logs -f app        # follow logs for just the app service
 docker compose ps                  # see status of all services
-```
-
-By default Docker logs can grow unbounded and fill your disk over months. Add this to each service to cap it:
-
-```yaml
-    logging:
+</code></pre>
+<p>By default Docker logs can grow unbounded and fill your disk over months. Add this to each service to cap it:</p>
+<pre><code class="language-yaml">    logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "3"
-```
-
-This keeps at most 3 rotated 10MB log files per container (30MB cap), old ones auto-deleted.
-
-### Env vars and secrets, safely
-
-Never hardcode secrets (DB password, JWT secret) in `docker-compose.yml` or the Dockerfile, since both typically end up in git. Instead, use a `.env` file that sits **only on the server**, never committed:
-
-```
-# /opt/pacecircle/.env
-DB_PASSWORD=<long-random-string>
-JWT_SECRET=<long-random-string>
-```
-
-Reference it in `docker-compose.yml`:
-
-```yaml
-services:
+        max-size: &quot;10m&quot;
+        max-file: &quot;3&quot;
+</code></pre>
+<p>This keeps at most 3 rotated 10MB log files per container (30MB cap), old ones auto-deleted.</p>
+<h3 id="env-vars-and-secrets-safely">Env vars and secrets, safely</h3>
+<p>Never hardcode secrets (DB password, JWT secret) in <code>docker-compose.yml</code> or the Dockerfile, since both typically end up in git. Instead, use a <code>.env</code> file that sits <strong>only on the server</strong>, never committed:</p>
+<pre><code># /opt/pacecircle/.env
+DB_PASSWORD=&lt;long-random-string&gt;
+JWT_SECRET=&lt;long-random-string&gt;
+</code></pre>
+<p>Reference it in <code>docker-compose.yml</code>:</p>
+<pre><code class="language-yaml">services:
   app:
     env_file: .env
   db:
     env_file: .env
-```
-
-Add `.env` to your repo's `.gitignore` (you likely already do this locally; double check it's also true here).
-
-Generate strong random secrets:
-
-```bash
-openssl rand -base64 32
-```
-
-Lock down the file: `chmod 600 .env` (see section 2).
-
-### Persisting Postgres data with volumes
-
-Without a volume, killing the Postgres container deletes all your data. A **named volume** is Docker-managed storage that survives container restarts/recreation:
-
-```yaml
-services:
+</code></pre>
+<p>Add <code>.env</code> to your repo's <code>.gitignore</code> (you likely already do this locally; double check it's also true here).</p>
+<p>Generate strong random secrets:</p>
+<pre><code class="language-bash">openssl rand -base64 32
+</code></pre>
+<p>Lock down the file: <code>chmod 600 .env</code> (see section 2).</p>
+<h3 id="persisting-postgres-data-with-volumes">Persisting Postgres data with volumes</h3>
+<p>Without a volume, killing the Postgres container deletes all your data. A <strong>named volume</strong> is Docker-managed storage that survives container restarts/recreation:</p>
+<pre><code class="language-yaml">services:
   db:
     image: postgres:16
     volumes:
       - pgdata:/var/lib/postgresql/data
 volumes:
   pgdata:
-```
-
-`pgdata:/var/lib/postgresql/data` means "mount the named volume `pgdata` at the path inside the container where Postgres stores its files." The volume itself lives on the host at `/var/lib/docker/volumes/pgdata/_data`, but you shouldn't need to touch that directly.
-
-### Verify
-
-```bash
-docker compose ps                                  # both services "Up"
-docker compose exec db psql -U <user> -d <dbname> -c '\dt'   # list tables, confirms DB is reachable and schema exists
+</code></pre>
+<p><code>pgdata:/var/lib/postgresql/data</code> means "mount the named volume <code>pgdata</code> at the path inside the container where Postgres stores its files." The volume itself lives on the host at <code>/var/lib/docker/volumes/pgdata/_data</code>, but you shouldn't need to touch that directly.</p>
+<h3 id="verify_2">Verify</h3>
+<pre><code class="language-bash">docker compose ps                                  # both services &quot;Up&quot;
+docker compose exec db psql -U &lt;user&gt; -d &lt;dbname&gt; -c '\dt'   # list tables, confirms DB is reachable and schema exists
 curl http://localhost:8080/actuator/health          # or whatever your health endpoint is, from inside the VM
-```
-
-Test persistence: `docker compose down` (stops and removes containers, but **not** volumes by default) then `docker compose up -d` again, and confirm your data is still there. (`docker compose down -v` *would* delete volumes too. Never run that against a server with real data unless you mean it.)
-
-### Common mistakes
-
-- `docker compose down -v` on a server with real user data. The `-v` deletes volumes. This is the #1 way people lose their database.
-- Forgetting `restart: unless-stopped`, so a VM reboot (Oracle does occasional maintenance reboots) leaves your app down until you notice.
-- Putting real secrets directly in `docker-compose.yml` and committing it.
-- Not capping log size, leading to a full disk months later (`docker compose up` then fails mysteriously).
-
-### Rabbit holes to skip
-
-- Kubernetes, Docker Swarm. Total overkill for one VM and ~100 users.
-- Building your own base images from scratch. Your existing multi-stage Dockerfile is already fine.
-
----
-
-## 4. Networking & Firewalls
-
-### What/Why
-
-This is the step that trips up almost everyone new to Oracle Cloud specifically, because there are **two independent firewalls**, and both must allow a port before traffic gets through.
-
-1. **Oracle Cloud Security List** (or the newer "Network Security Groups"): a cloud-level firewall, configured in the Oracle web console, that controls what's allowed to even reach your VM's virtual network interface.
-2. **ufw** (Uncomplicated Firewall), running on Ubuntu itself: an OS-level firewall that controls what the VM's own kernel allows in, after Oracle's layer has already let it through.
-
-If you open a port in only one of the two, it stays blocked. This is the single most common "why can't I reach my server" issue with Oracle Cloud specifically (other clouds like DigitalOcean only have the OS-level firewall by default, which is why tutorials for those clouds skip this step).
-
-### Steps
-
-**4.1 Oracle Security List**
-
-In the Oracle Cloud console: Networking → Virtual Cloud Networks → your VCN → Security Lists → your security list → Add Ingress Rules.
-
-Add rules for:
+</code></pre>
+<p>Test persistence: <code>docker compose down</code> (stops and removes containers, but <strong>not</strong> volumes by default) then <code>docker compose up -d</code> again, and confirm your data is still there. (<code>docker compose down -v</code> <em>would</em> delete volumes too. Never run that against a server with real data unless you mean it.)</p>
+<h3 id="common-mistakes_2">Common mistakes</h3>
+<ul>
+<li><code>docker compose down -v</code> on a server with real user data. The <code>-v</code> deletes volumes. This is the #1 way people lose their database.</li>
+<li>Forgetting <code>restart: unless-stopped</code>, so a VM reboot (Oracle does occasional maintenance reboots) leaves your app down until you notice.</li>
+<li>Putting real secrets directly in <code>docker-compose.yml</code> and committing it.</li>
+<li>Not capping log size, leading to a full disk months later (<code>docker compose up</code> then fails mysteriously).</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_2">Rabbit holes to skip</h3>
+<ul>
+<li>Kubernetes, Docker Swarm. Total overkill for one VM and ~100 users.</li>
+<li>Building your own base images from scratch. Your existing multi-stage Dockerfile is already fine.</li>
+</ul>
+<hr />
+<h2 id="4-networking-firewalls">4. Networking &amp; Firewalls</h2>
+<h3 id="whatwhy_3">What/Why</h3>
+<p>This is the step that trips up almost everyone new to Oracle Cloud specifically, because there are <strong>two independent firewalls</strong>, and both must allow a port before traffic gets through.</p>
+<ol>
+<li><strong>Oracle Cloud Security List</strong> (or the newer "Network Security Groups"): a cloud-level firewall, configured in the Oracle web console, that controls what's allowed to even reach your VM's virtual network interface.</li>
+<li><strong>ufw</strong> (Uncomplicated Firewall), running on Ubuntu itself: an OS-level firewall that controls what the VM's own kernel allows in, after Oracle's layer has already let it through.</li>
+</ol>
+<p>If you open a port in only one of the two, it stays blocked. This is the single most common "why can't I reach my server" issue with Oracle Cloud specifically (other clouds like DigitalOcean only have the OS-level firewall by default, which is why tutorials for those clouds skip this step).</p>
+<h3 id="steps_1">Steps</h3>
+<p><strong>4.1 Oracle Security List</strong></p>
+<p>In the Oracle Cloud console: Networking → Virtual Cloud Networks → your VCN → Security Lists → your security list → Add Ingress Rules.</p>
+<p>Add rules for:
 - Port 22 (SSH) — likely already there by default.
 - Port 80 (HTTP) — needed for Let's Encrypt's verification step.
-- Port 443 (HTTPS) — your actual public traffic.
-
-Each rule needs a **source CIDR**. `0.0.0.0/0` means "anywhere on the internet" (this is correct for 80/443, since the public needs to reach your app). For SSH, if your home/office IP is stable, consider restricting source to just your IP for tighter security; otherwise `0.0.0.0/0` works but means anyone can attempt to SSH in (they still need your private key to succeed, but it's more attack surface).
-
-**4.2 ufw on the VM**
-
-```bash
-sudo ufw allow 22/tcp     # SSH, do this FIRST
+- Port 443 (HTTPS) — your actual public traffic.</p>
+<p>Each rule needs a <strong>source CIDR</strong>. <code>0.0.0.0/0</code> means "anywhere on the internet" (this is correct for 80/443, since the public needs to reach your app). For SSH, if your home/office IP is stable, consider restricting source to just your IP for tighter security; otherwise <code>0.0.0.0/0</code> works but means anyone can attempt to SSH in (they still need your private key to succeed, but it's more attack surface).</p>
+<p><strong>4.2 ufw on the VM</strong></p>
+<pre><code class="language-bash">sudo ufw allow 22/tcp     # SSH, do this FIRST
 sudo ufw allow 80/tcp     # HTTP (for Let's Encrypt + redirects)
 sudo ufw allow 443/tcp    # HTTPS
 sudo ufw enable
-```
-
-**Do not run `ufw enable` before allowing port 22.** If you do, you lock yourself out of SSH instantly, with no way back in except Oracle's web-based serial console (which works but is slow and annoying).
-
-### Why never expose Postgres directly
-
-Notice port 5432 (Postgres's default) is not in either firewall's allow list. This is intentional. Postgres should only be reachable from inside the Docker network (i.e., from your app container to your DB container), never from the public internet. If you exposed 5432 publicly, automated internet-wide scanners (this happens within minutes of any new public IP) would start probing it for default/weak credentials almost immediately. As long as you don't add a `ports:` mapping for the `db` service in `docker-compose.yml` (only the `app` service needs one, and even that should ideally only be reachable by Caddy, see below), and don't open 5432 in either firewall, you're safe by default. Docker Compose's internal network already lets `app` reach `db` by service name (e.g. `db:5432`) without any port publishing needed.
-
-### Verify
-
-```bash
-# from your laptop, not the VM:
-curl -v telnet://<VM_PUBLIC_IP>:443    # should connect (once Caddy is running) - "connected" not "timed out"
-curl -v telnet://<VM_PUBLIC_IP>:5432   # should hang/timeout - confirms Postgres is NOT reachable
-```
-
-### Common mistakes
-
-- Enabling `ufw` before allowing SSH (locks you out).
-- Opening a port in `ufw` but forgetting the matching Oracle Security List rule, or vice versa, then concluding "Docker is broken" when it's actually a firewall mismatch.
-- Publishing Postgres's port in `docker-compose.yml` (`ports: ["5432:5432"]`) out of habit from local dev, where it's harmless. On a server, delete that line entirely; let only the internal Docker network reach it.
-
-### Rabbit holes to skip
-
-- VPNs, WireGuard tunnels, complex Network Security Group rule chains. A simple allow-list of 22/80/443 covers your use case.
-
----
-
-## 5. HTTPS & Domains
-
-### What/Why
-
-App stores (Apple App Store, Google Play) generally require backend API calls to use HTTPS, not plain HTTP, both for security and as a platform policy (iOS's App Transport Security blocks plain HTTP by default). HTTPS requires a TLS certificate, and getting one for a domain (not a bare IP address, certificate authorities won't issue certs for raw IPs) involves proving you control that domain.
-
-**Caddy** is a web server that automates this entire process: point a domain at your server, run Caddy, and it automatically obtains and renews a free Let's Encrypt certificate and starts serving HTTPS, with zero manual certificate management. This is dramatically simpler than the older nginx + certbot approach.
-
-### Steps
-
-**5.1 Point a domain at your VM**
-
-In your domain registrar's DNS settings (or a subdomain if you already own a domain, e.g. `api.pacecircle.app`), add an **A record**:
-
-```
-Type: A
+</code></pre>
+<p><strong>Do not run <code>ufw enable</code> before allowing port 22.</strong> If you do, you lock yourself out of SSH instantly, with no way back in except Oracle's web-based serial console (which works but is slow and annoying).</p>
+<h3 id="why-never-expose-postgres-directly">Why never expose Postgres directly</h3>
+<p>Notice port 5432 (Postgres's default) is not in either firewall's allow list. This is intentional. Postgres should only be reachable from inside the Docker network (i.e., from your app container to your DB container), never from the public internet. If you exposed 5432 publicly, automated internet-wide scanners (this happens within minutes of any new public IP) would start probing it for default/weak credentials almost immediately. As long as you don't add a <code>ports:</code> mapping for the <code>db</code> service in <code>docker-compose.yml</code> (only the <code>app</code> service needs one, and even that should ideally only be reachable by Caddy, see below), and don't open 5432 in either firewall, you're safe by default. Docker Compose's internal network already lets <code>app</code> reach <code>db</code> by service name (e.g. <code>db:5432</code>) without any port publishing needed.</p>
+<h3 id="verify_3">Verify</h3>
+<pre><code class="language-bash"># from your laptop, not the VM:
+curl -v telnet://&lt;VM_PUBLIC_IP&gt;:443    # should connect (once Caddy is running) - &quot;connected&quot; not &quot;timed out&quot;
+curl -v telnet://&lt;VM_PUBLIC_IP&gt;:5432   # should hang/timeout - confirms Postgres is NOT reachable
+</code></pre>
+<h3 id="common-mistakes_3">Common mistakes</h3>
+<ul>
+<li>Enabling <code>ufw</code> before allowing SSH (locks you out).</li>
+<li>Opening a port in <code>ufw</code> but forgetting the matching Oracle Security List rule, or vice versa, then concluding "Docker is broken" when it's actually a firewall mismatch.</li>
+<li>Publishing Postgres's port in <code>docker-compose.yml</code> (<code>ports: ["5432:5432"]</code>) out of habit from local dev, where it's harmless. On a server, delete that line entirely; let only the internal Docker network reach it.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_3">Rabbit holes to skip</h3>
+<ul>
+<li>VPNs, WireGuard tunnels, complex Network Security Group rule chains. A simple allow-list of 22/80/443 covers your use case.</li>
+</ul>
+<hr />
+<h2 id="5-https-domains">5. HTTPS &amp; Domains</h2>
+<h3 id="whatwhy_4">What/Why</h3>
+<p>App stores (Apple App Store, Google Play) generally require backend API calls to use HTTPS, not plain HTTP, both for security and as a platform policy (iOS's App Transport Security blocks plain HTTP by default). HTTPS requires a TLS certificate, and getting one for a domain (not a bare IP address, certificate authorities won't issue certs for raw IPs) involves proving you control that domain.</p>
+<p><strong>Caddy</strong> is a web server that automates this entire process: point a domain at your server, run Caddy, and it automatically obtains and renews a free Let's Encrypt certificate and starts serving HTTPS, with zero manual certificate management. This is dramatically simpler than the older nginx + certbot approach.</p>
+<h3 id="steps_2">Steps</h3>
+<p><strong>5.1 Point a domain at your VM</strong></p>
+<p>In your domain registrar's DNS settings (or a subdomain if you already own a domain, e.g. <code>api.pacecircle.app</code>), add an <strong>A record</strong>:</p>
+<pre><code>Type: A
 Name: api  (or @ for root domain)
-Value: <VM_PUBLIC_IP>
+Value: &lt;VM_PUBLIC_IP&gt;
 TTL: 300 (5 min, or whatever default)
-```
-
-DNS changes can take minutes to a few hours to propagate globally (TTL above is a hint, not a guarantee).
-
-**5.2 Install Caddy**
-
-```bash
-sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+</code></pre>
+<p>DNS changes can take minutes to a few hours to propagate globally (TTL above is a hint, not a guarantee).</p>
+<p><strong>5.2 Install Caddy</strong></p>
+<pre><code class="language-bash">sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
 sudo apt update
 sudo apt install caddy
-```
-
-**5.3 Configure Caddy as a reverse proxy**
-
-Edit `/etc/caddy/Caddyfile`:
-
-```
-api.pacecircle.app {
+</code></pre>
+<p><strong>5.3 Configure Caddy as a reverse proxy</strong></p>
+<p>Edit <code>/etc/caddy/Caddyfile</code>:</p>
+<pre><code>api.pacecircle.app {
     reverse_proxy localhost:8080
 }
-```
-
-That's the entire config. Caddy reads this, sees a real domain (not `localhost`), and automatically requests a Let's Encrypt certificate for it, handling renewal forever after. `reverse_proxy localhost:8080` means: for any request to this domain, forward it to whatever's listening on port 8080 (your Spring Boot app), and handle the HTTPS termination itself.
-
-Restart Caddy to apply:
-
-```bash
-sudo systemctl restart caddy
-```
-
-**5.4 Make sure your app port isn't separately exposed publicly**
-
-Your Spring Boot container should publish port 8080 only to `localhost` (the VM itself), not the public internet, since Caddy is the only thing that should talk to it directly:
-
-```yaml
-services:
+</code></pre>
+<p>That's the entire config. Caddy reads this, sees a real domain (not <code>localhost</code>), and automatically requests a Let's Encrypt certificate for it, handling renewal forever after. <code>reverse_proxy localhost:8080</code> means: for any request to this domain, forward it to whatever's listening on port 8080 (your Spring Boot app), and handle the HTTPS termination itself.</p>
+<p>Restart Caddy to apply:</p>
+<pre><code class="language-bash">sudo systemctl restart caddy
+</code></pre>
+<p><strong>5.4 Make sure your app port isn't separately exposed publicly</strong></p>
+<p>Your Spring Boot container should publish port 8080 only to <code>localhost</code> (the VM itself), not the public internet, since Caddy is the only thing that should talk to it directly:</p>
+<pre><code class="language-yaml">services:
   app:
     ports:
-      - "127.0.0.1:8080:8080"
-```
-
-`127.0.0.1:8080:8080` (rather than just `8080:8080`) binds the host side only to localhost, so it's reachable from Caddy (running on the same machine) but not from the outside world directly. This is a second layer of defense even if someone bypassed your firewall rules.
-
-### Verify
-
-```bash
-curl -v https://api.pacecircle.app/actuator/health
-```
-
-You should get a valid response with no certificate warnings. You can also check certificate details in a browser (padlock icon → certificate info) and confirm it's issued by "Let's Encrypt" and not expired.
-
-### Common mistakes
-
-- Pointing DNS at the VM but testing immediately, before propagation finishes, then concluding Caddy is broken.
-- Forgetting that Let's Encrypt needs port 80 reachable too (it uses an HTTP-based challenge by default to verify domain ownership), so make sure 80 is open in both firewalls even though your end users will only ever use 443.
-- Leaving your app's port exposed to `0.0.0.0` instead of `127.0.0.1`, leaving a second, uncertified path directly to your app.
-
-### Rabbit holes to skip
-
-- Manually generating certbot certs, wildcard certificates, multi-domain SAN certs. Caddy's defaults cover your case completely.
-
----
-
-## 6. Keeping It Alive & Updating
-
-### What/Why
-
-Three separate concerns: surviving reboots, deploying new code, and not losing data.
-
-### Auto-restart on reboot
-
-You already set `restart: unless-stopped` in section 3 for your containers, which handles container-level restarts. But Docker itself, and Caddy, also need to start on boot:
-
-```bash
-sudo systemctl enable docker
+      - &quot;127.0.0.1:8080:8080&quot;
+</code></pre>
+<p><code>127.0.0.1:8080:8080</code> (rather than just <code>8080:8080</code>) binds the host side only to localhost, so it's reachable from Caddy (running on the same machine) but not from the outside world directly. This is a second layer of defense even if someone bypassed your firewall rules.</p>
+<h3 id="verify_4">Verify</h3>
+<pre><code class="language-bash">curl -v https://api.pacecircle.app/actuator/health
+</code></pre>
+<p>You should get a valid response with no certificate warnings. You can also check certificate details in a browser (padlock icon → certificate info) and confirm it's issued by "Let's Encrypt" and not expired.</p>
+<h3 id="common-mistakes_4">Common mistakes</h3>
+<ul>
+<li>Pointing DNS at the VM but testing immediately, before propagation finishes, then concluding Caddy is broken.</li>
+<li>Forgetting that Let's Encrypt needs port 80 reachable too (it uses an HTTP-based challenge by default to verify domain ownership), so make sure 80 is open in both firewalls even though your end users will only ever use 443.</li>
+<li>Leaving your app's port exposed to <code>0.0.0.0</code> instead of <code>127.0.0.1</code>, leaving a second, uncertified path directly to your app.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_4">Rabbit holes to skip</h3>
+<ul>
+<li>Manually generating certbot certs, wildcard certificates, multi-domain SAN certs. Caddy's defaults cover your case completely.</li>
+</ul>
+<hr />
+<h2 id="6-keeping-it-alive-updating">6. Keeping It Alive &amp; Updating</h2>
+<h3 id="whatwhy_5">What/Why</h3>
+<p>Three separate concerns: surviving reboots, deploying new code, and not losing data.</p>
+<h3 id="auto-restart-on-reboot">Auto-restart on reboot</h3>
+<p>You already set <code>restart: unless-stopped</code> in section 3 for your containers, which handles container-level restarts. But Docker itself, and Caddy, also need to start on boot:</p>
+<pre><code class="language-bash">sudo systemctl enable docker
 sudo systemctl enable caddy
-```
-
-`enable` (distinct from `start`) means "start this automatically every time the machine boots," not just right now.
-
-### Redeploying when you push new code
-
-Manual but simple flow, given your scale:
-
-```bash
-cd /opt/pacecircle
+</code></pre>
+<p><code>enable</code> (distinct from <code>start</code>) means "start this automatically every time the machine boots," not just right now.</p>
+<h3 id="redeploying-when-you-push-new-code">Redeploying when you push new code</h3>
+<p>Manual but simple flow, given your scale:</p>
+<pre><code class="language-bash">cd /opt/pacecircle
 git pull
 docker compose build app          # rebuild only the app image
 docker compose up -d app          # recreate just the app container with the new image
-```
-
-`docker compose up -d app` only touches the `app` service; your running Postgres container and its data are untouched. This gives you near-zero-downtime deploys (a few seconds gap while the old container stops and the new one starts).
-
-For something more automated later (not needed yet at 100 users): a simple shell script wrapping the three lines above, triggered manually via SSH, is plenty. GitHub Actions-based CI/CD is a nice-to-have, not a need-to-have, at this scale.
-
-### Backups of the Postgres volume
-
-Simplest reliable approach: a logical dump via `pg_dump`, scheduled with `cron` (Linux's built-in job scheduler):
-
-```bash
-docker compose exec -T db pg_dump -U <user> <dbname> | gzip > /opt/backups/pacecircle-$(date +%F).sql.gz
-```
-
-`-T` disables pseudo-TTY allocation (needed when piping output, otherwise the output gets garbled with terminal control characters). `$(date +%F)` inserts today's date as `YYYY-MM-DD`.
-
-Automate it via cron:
-
-```bash
-crontab -e
-```
-
-Add a line:
-
-```
-0 3 * * * docker compose -f /opt/pacecircle/docker-compose.yml exec -T db pg_dump -U <user> <dbname> | gzip > /opt/backups/pacecircle-$(date +\%F).sql.gz
-```
-
-This runs daily at 3am (`0 3 * * *` = minute 0, hour 3, every day/month/weekday). Note the `\%` escaping needed inside crontab specifically.
-
-Crucially, **copy backups off the VM periodically** (download via `scp`, or push to cloud storage). A backup stored only on the same disk as your live data doesn't protect you if the disk itself fails or the VM is deleted.
-
-### Verify
-
-- Reboot the VM (`sudo reboot`), wait a minute, then confirm `curl https://api.pacecircle.app/...` works again without you touching anything.
-- Manually run the backup command once, confirm a `.sql.gz` file appears, and test restoring it on your local machine (an untested backup is not a real backup).
-
-### Common mistakes
-
-- Assuming `restart: unless-stopped` alone handles a full VM reboot, without separately checking `systemctl enable docker`. If the Docker daemon itself doesn't start, no container can restart.
-- Never testing your backups. People discover a backup is corrupt/incomplete only when they desperately need it.
-- Forgetting that `docker compose build app` requires your source code to be present on the VM, i.e. you need `git pull` (or however you're transferring updated code) before rebuilding.
-
-### Rabbit holes to skip
-
-- Full CI/CD pipelines, blue-green deployments, point-in-time recovery setups. All real things, all unnecessary at this scale.
-
----
-
-## 7. Security Hygiene (Minimum Bar)
-
-This is your checklist, each one explained:
-
-### SSH key-only login (disable password auth)
-
-Once you've confirmed key-based login works for your non-root user (section 1), disable password authentication entirely so brute-force password guessing against SSH is impossible:
-
-Edit `/etc/ssh/sshd_config`:
-
-```
-PasswordAuthentication no
+</code></pre>
+<p><code>docker compose up -d app</code> only touches the <code>app</code> service; your running Postgres container and its data are untouched. This gives you near-zero-downtime deploys (a few seconds gap while the old container stops and the new one starts).</p>
+<p>For something more automated later (not needed yet at 100 users): a simple shell script wrapping the three lines above, triggered manually via SSH, is plenty. GitHub Actions-based CI/CD is a nice-to-have, not a need-to-have, at this scale.</p>
+<h3 id="backups-of-the-postgres-volume">Backups of the Postgres volume</h3>
+<p>Simplest reliable approach: a logical dump via <code>pg_dump</code>, scheduled with <code>cron</code> (Linux's built-in job scheduler):</p>
+<pre><code class="language-bash">docker compose exec -T db pg_dump -U &lt;user&gt; &lt;dbname&gt; | gzip &gt; /opt/backups/pacecircle-$(date +%F).sql.gz
+</code></pre>
+<p><code>-T</code> disables pseudo-TTY allocation (needed when piping output, otherwise the output gets garbled with terminal control characters). <code>$(date +%F)</code> inserts today's date as <code>YYYY-MM-DD</code>.</p>
+<p>Automate it via cron:</p>
+<pre><code class="language-bash">crontab -e
+</code></pre>
+<p>Add a line:</p>
+<pre><code>0 3 * * * docker compose -f /opt/pacecircle/docker-compose.yml exec -T db pg_dump -U &lt;user&gt; &lt;dbname&gt; | gzip &gt; /opt/backups/pacecircle-$(date +\%F).sql.gz
+</code></pre>
+<p>This runs daily at 3am (<code>0 3 * * *</code> = minute 0, hour 3, every day/month/weekday). Note the <code>\%</code> escaping needed inside crontab specifically.</p>
+<p>Crucially, <strong>copy backups off the VM periodically</strong> (download via <code>scp</code>, or push to cloud storage). A backup stored only on the same disk as your live data doesn't protect you if the disk itself fails or the VM is deleted.</p>
+<h3 id="verify_5">Verify</h3>
+<ul>
+<li>Reboot the VM (<code>sudo reboot</code>), wait a minute, then confirm <code>curl https://api.pacecircle.app/...</code> works again without you touching anything.</li>
+<li>Manually run the backup command once, confirm a <code>.sql.gz</code> file appears, and test restoring it on your local machine (an untested backup is not a real backup).</li>
+</ul>
+<h3 id="common-mistakes_5">Common mistakes</h3>
+<ul>
+<li>Assuming <code>restart: unless-stopped</code> alone handles a full VM reboot, without separately checking <code>systemctl enable docker</code>. If the Docker daemon itself doesn't start, no container can restart.</li>
+<li>Never testing your backups. People discover a backup is corrupt/incomplete only when they desperately need it.</li>
+<li>Forgetting that <code>docker compose build app</code> requires your source code to be present on the VM, i.e. you need <code>git pull</code> (or however you're transferring updated code) before rebuilding.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_5">Rabbit holes to skip</h3>
+<ul>
+<li>Full CI/CD pipelines, blue-green deployments, point-in-time recovery setups. All real things, all unnecessary at this scale.</li>
+</ul>
+<hr />
+<h2 id="7-security-hygiene-minimum-bar">7. Security Hygiene (Minimum Bar)</h2>
+<p>This is your checklist, each one explained:</p>
+<h3 id="ssh-key-only-login-disable-password-auth">SSH key-only login (disable password auth)</h3>
+<p>Once you've confirmed key-based login works for your non-root user (section 1), disable password authentication entirely so brute-force password guessing against SSH is impossible:</p>
+<p>Edit <code>/etc/ssh/sshd_config</code>:</p>
+<pre><code>PasswordAuthentication no
 PermitRootLogin no
-```
-
-Then:
-
-```bash
-sudo systemctl restart sshd
-```
-
-**Test in a new terminal before closing your current session**, same caution as section 1.
-
-### Automatic security updates
-
-```bash
-sudo apt install unattended-upgrades
+</code></pre>
+<p>Then:</p>
+<pre><code class="language-bash">sudo systemctl restart sshd
+</code></pre>
+<p><strong>Test in a new terminal before closing your current session</strong>, same caution as section 1.</p>
+<h3 id="automatic-security-updates">Automatic security updates</h3>
+<pre><code class="language-bash">sudo apt install unattended-upgrades
 sudo dpkg-reconfigure --priority=low unattended-upgrades
-```
-
-This automatically applies security patches in the background, without you needing to remember to `apt update && apt upgrade` regularly. Important because unpatched VMs are a common entry point for automated attacks.
-
-### Not running things as root
-
-- Your Spring Boot Docker container: confirm your Dockerfile creates and switches to a non-root user (e.g. `USER spring` near the end), rather than running as root inside the container. If it doesn't yet, that's a quick fix worth making, since a container running as root that gets compromised has more potential blast radius (e.g. easier paths to escape the container or affect the host).
-- Your VM login: you've already moved off needing the `root`/`ubuntu` accounts day to day, in favor of `vicki` with `sudo`.
-
-### Rotating your JWT secret
-
-Periodically (and immediately if you ever suspect it leaked, e.g. accidentally committed to git), generate a new secret:
-
-```bash
-openssl rand -base64 32
-```
-
-Update it in your server's `.env` file, then redeploy (`docker compose up -d app`). Important consequence to know: rotating the JWT secret invalidates all existing tokens, meaning every logged-in user gets logged out and must log in again. Fine for a side project; worth knowing before you do it on a whim with active users.
-
-### Verify
-
-- `ssh vicki@<IP> -o PasswordAuthentication=no` should still succeed (key auth unaffected).
-- Try `ssh ubuntu@<IP>` (or any account) with a deliberately wrong password; it should be rejected immediately without even prompting, confirming password auth is off.
-- `docker exec <container> whoami` should print a non-root username, not `root`.
-
-### Common mistakes
-
-- Setting `PasswordAuthentication no` without having already confirmed key-based login works. This is the second-most common way people lock themselves out, right after the `ufw enable` mistake in section 4.
-- Forgetting that rotating the JWT secret logs everyone out; doing it casually while users are actively using the app.
-
-### Rabbit holes to skip
-
-- Fail2ban, intrusion detection systems, SELinux/AppArmor hardening, full CIS benchmark compliance. Good practices for larger production systems; not necessary at your scale, and easy to spend a weekend on for marginal benefit right now.
-
----
-
-## Suggested Order of Operations (Summary Checklist)
-
-1. [ ] Generate SSH key, launch VM with public key attached, connect as default user.
-2. [ ] Create `vicki` user with sudo, copy SSH key, confirm login works in a separate session.
-3. [ ] Get comfortable with `ls`, `cd`, `chmod`, `journalctl`, `ss -tulpn`.
-4. [ ] Install Docker, add `vicki` to `docker` group.
-5. [ ] Write `.env` on the server with real secrets (never committed to git), `chmod 600` it.
-6. [ ] Add `restart: unless-stopped`, log size caps, and a named volume for Postgres to `docker-compose.yml`.
-7. [ ] Remove any public port mapping for the `db` service; bind `app`'s port to `127.0.0.1` only.
-8. [ ] Open 22/80/443 in **both** Oracle Security List and `ufw`; enable `ufw` (after allowing 22!).
-9. [ ] Point a domain's A record at the VM's IP.
-10. [ ] Install Caddy, configure the one-block reverse proxy config, restart Caddy.
-11. [ ] Verify HTTPS works end to end via `curl`.
-12. [ ] `systemctl enable docker` and `caddy`; test full VM reboot.
-13. [ ] Set up and test a Postgres backup cron job; copy a backup off-VM.
-14. [ ] Disable SSH password auth and root login (only after confirming key login works).
-15. [ ] Enable unattended security upgrades.
-16. [ ] Confirm your container runs as a non-root user.
-
-Good luck with the deployment. Each section above should let you explain *why* a step exists, not just paste a command, which was the actual goal.
+</code></pre>
+<p>This automatically applies security patches in the background, without you needing to remember to <code>apt update &amp;&amp; apt upgrade</code> regularly. Important because unpatched VMs are a common entry point for automated attacks.</p>
+<h3 id="not-running-things-as-root">Not running things as root</h3>
+<ul>
+<li>Your Spring Boot Docker container: confirm your Dockerfile creates and switches to a non-root user (e.g. <code>USER spring</code> near the end), rather than running as root inside the container. If it doesn't yet, that's a quick fix worth making, since a container running as root that gets compromised has more potential blast radius (e.g. easier paths to escape the container or affect the host).</li>
+<li>Your VM login: you've already moved off needing the <code>root</code>/<code>ubuntu</code> accounts day to day, in favor of <code>vicki</code> with <code>sudo</code>.</li>
+</ul>
+<h3 id="rotating-your-jwt-secret">Rotating your JWT secret</h3>
+<p>Periodically (and immediately if you ever suspect it leaked, e.g. accidentally committed to git), generate a new secret:</p>
+<pre><code class="language-bash">openssl rand -base64 32
+</code></pre>
+<p>Update it in your server's <code>.env</code> file, then redeploy (<code>docker compose up -d app</code>). Important consequence to know: rotating the JWT secret invalidates all existing tokens, meaning every logged-in user gets logged out and must log in again. Fine for a side project; worth knowing before you do it on a whim with active users.</p>
+<h3 id="verify_6">Verify</h3>
+<ul>
+<li><code>ssh vicki@&lt;IP&gt; -o PasswordAuthentication=no</code> should still succeed (key auth unaffected).</li>
+<li>Try <code>ssh ubuntu@&lt;IP&gt;</code> (or any account) with a deliberately wrong password; it should be rejected immediately without even prompting, confirming password auth is off.</li>
+<li><code>docker exec &lt;container&gt; whoami</code> should print a non-root username, not <code>root</code>.</li>
+</ul>
+<h3 id="common-mistakes_6">Common mistakes</h3>
+<ul>
+<li>Setting <code>PasswordAuthentication no</code> without having already confirmed key-based login works. This is the second-most common way people lock themselves out, right after the <code>ufw enable</code> mistake in section 4.</li>
+<li>Forgetting that rotating the JWT secret logs everyone out; doing it casually while users are actively using the app.</li>
+</ul>
+<h3 id="rabbit-holes-to-skip_6">Rabbit holes to skip</h3>
+<ul>
+<li>Fail2ban, intrusion detection systems, SELinux/AppArmor hardening, full CIS benchmark compliance. Good practices for larger production systems; not necessary at your scale, and easy to spend a weekend on for marginal benefit right now.</li>
+</ul>
+<hr />
+<h2 id="suggested-order-of-operations-summary-checklist">Suggested Order of Operations (Summary Checklist)</h2>
+<ol>
+<li>[ ] Generate SSH key, launch VM with public key attached, connect as default user.</li>
+<li>[ ] Create <code>vicki</code> user with sudo, copy SSH key, confirm login works in a separate session.</li>
+<li>[ ] Get comfortable with <code>ls</code>, <code>cd</code>, <code>chmod</code>, <code>journalctl</code>, <code>ss -tulpn</code>.</li>
+<li>[ ] Install Docker, add <code>vicki</code> to <code>docker</code> group.</li>
+<li>[ ] Write <code>.env</code> on the server with real secrets (never committed to git), <code>chmod 600</code> it.</li>
+<li>[ ] Add <code>restart: unless-stopped</code>, log size caps, and a named volume for Postgres to <code>docker-compose.yml</code>.</li>
+<li>[ ] Remove any public port mapping for the <code>db</code> service; bind <code>app</code>'s port to <code>127.0.0.1</code> only.</li>
+<li>[ ] Open 22/80/443 in <strong>both</strong> Oracle Security List and <code>ufw</code>; enable <code>ufw</code> (after allowing 22!).</li>
+<li>[ ] Point a domain's A record at the VM's IP.</li>
+<li>[ ] Install Caddy, configure the one-block reverse proxy config, restart Caddy.</li>
+<li>[ ] Verify HTTPS works end to end via <code>curl</code>.</li>
+<li>[ ] <code>systemctl enable docker</code> and <code>caddy</code>; test full VM reboot.</li>
+<li>[ ] Set up and test a Postgres backup cron job; copy a backup off-VM.</li>
+<li>[ ] Disable SSH password auth and root login (only after confirming key login works).</li>
+<li>[ ] Enable unattended security upgrades.</li>
+<li>[ ] Confirm your container runs as a non-root user.</li>
+</ol>
+<p>Good luck with the deployment. Each section above should let you explain <em>why</em> a step exists, not just paste a command, which was the actual goal.</p>
+</body>
+</html>
